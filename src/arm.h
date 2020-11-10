@@ -47,6 +47,7 @@ typedef struct stArmSence {
 } stArmSence_t;
 
 
+int arm_load_sence();
 int arm_add_sence(char *name)
 int arm_del_sence(char *name)
 int arm_eab_sence(char *name)
@@ -55,6 +56,20 @@ int arm_clr_sence(char *name)
 int arm_sce_foreach(int (*cb)(char *name, int enable, int idx, char *action);
 
 
+/*
+{
+	"devnames": [
+		{"modelstr": "Mose", "type":"1212", "name":"Montion Sensor", "devconds":[{"attr":"devce.onoff", "value":"0"}, {"attr":"device.light.onoff", "value":1"}]},
+	],
+	"devices": [
+		{"modelstr": "Mose", "type":"1212", "mac":"0102030405060708", "trig_idx":1, "enable":1, "sence_idx":1},
+	],
+	"sences":	[
+		{"name":"KitchAlarm", "enable":1, "idx":1, "action":[{"attr":"device.off", "value":2}]}
+	],
+}
+
+*/
 #endif
 
 
