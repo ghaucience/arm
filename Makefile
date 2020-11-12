@@ -55,6 +55,7 @@ srcs	+= $(ROOTDIR)/src/util.c
 srcs 	+= $(ROOTDIR)/src/json_parser.c
 srcs 	+= $(ROOTDIR)/src/uproto.c
 srcs	+= $(ROOTDIR)/src/ubus.c
+srcs	+= $(ROOTDIR)/src/arm.c
 
 
 srcs  := $(subst .cpp,.c,$(srcs))

@@ -124,10 +124,6 @@ static int  write_version(const char *verfile) {
 static void run_loop() {
 	log_info(" ");
 
-	arm_device_type_init();
-	arm_device_init();
-	arm_sence_init();
-
 	while (1) {
 		/**> loop */
 		fd_set	fds;
