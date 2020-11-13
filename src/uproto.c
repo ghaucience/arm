@@ -54,6 +54,9 @@ static stUHandler_t uhs[] = {
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.dab_device",						set_dab_device},
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.grp_device",						set_grp_device},
 
+	{"GREENPOWR", "GATEWAY", "reportAttribute", "...",						NULL},
+	{"ZWAVE",			"GATEWAY", "reportAttribute", "...",						NULL},
+
 };
 
 static int _uproto_handler_cmd(const char *from, 

@@ -33,12 +33,12 @@ MKDIR		:= mkdir -p
 TARGET_CFLAGS							:= -Wall -g -O2  
 TARGET_CFLAGS							+= -I$(ROOTDIR)/gecko -I$(ROOTDIR)/ble/include/security
 TARGET_CFLAGS							+= -I$(ROOTDIR)/src
-TARGET_CFLAGS							+= -fPIC
+TARGET_CFLAGS							+= -fPIC -DJSON_IS_AMALGAMATION
 #TARGET_CFLAGS							+= -fpermissive
 TARGET_CFLAGS							+= $(CROSS_CFLAGS) 
 
 TARGET_CXXFLAGS						:= -std=c++0x 
-TARGET_CXXFLAGS						+= $(CFLAGS)
+TARGET_CXXFLAGS						+= $(TARGET_CFLAGS)
 
 TARGET_LDFLAGS						:= -lm -ljansson -lrt -ldl -lpthread -ljson-c -lubox -lblobmsg_json -lubus -lcares -lssl -lcrypto
 TARGET_LDFLAGS						+= -lstdc++
@@ -56,14 +56,26 @@ srcs 	+= $(ROOTDIR)/src/json_parser.c
 srcs 	+= $(ROOTDIR)/src/uproto.c
 srcs	+= $(ROOTDIR)/src/ubus.c
 srcs	+= $(ROOTDIR)/src/arm.c
-
+srcs	+= $(ROOTDIR)/src/jsoncpp.cpp
 
 srcs  := $(subst .cpp,.c,$(srcs))
+objs 	:= $(subst $(ROOTDIR),$(WORKDIR), $(subst .c,.o,$(srcs)))
 
-arm:  $(srcs)
+arm:  $(objs)
 	$(MKDIR) $(WORKDIR)
-	$(GCC) 		$(TARGET_CFLAGS) $(TARGET_LDFLAGS) $(srcs) -o  $(WORKDIR)/$@
+	#$(GCC) 	$(TARGET_CFLAGS) $(TARGET_LDFLAGS) $(srcs) -o  $(WORKDIR)/$@
+	$(GCC) 		$(TARGET_LDFLAGS) $(objs) -o  $(WORKDIR)/$@
 	$(STRIP)	$(WORKDIR)/$@
+
+
+$(ROOTDIR)/build/%.o : $(ROOTDIR)/%.c
+	@$(MKDIR) $(dir $@)
+	$(GCC) -c $< $(CFLAGS) $(TARGET_CFLAGS) -MMD -MP -MF"$(@:%.o=%.d)" -o $@
+
+$(ROOTDIR)/build/%.o : $(ROOTDIR)/%.cpp
+	@$(MKDIR) $(dir $@)
+	$(CXX) -c $< $(CXXFLAGS) $(TARGET_CXXFLAGS) -MMD -MP -MF"$(@:%.o=%.d)" -o $@
+
 
 clean:
 	rm -rf ./tags

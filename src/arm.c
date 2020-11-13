@@ -91,7 +91,11 @@ json_t *arm_get_trigger_condition_by_idx(char *_name, int idx) {
 	return NULL;
 }
 
-int arm_dev_foreach(int (*cb)(char *modelstr, char *type, char *mac, int trig_idx, int enable, int sence_idx)) {
+json_t *arm_get_action_by_idx(char *name, int idx) {
+	return NULL;
+}
+
+int arm_dev_foreach(int (*cb)(char *modelstr, char *type, char *mac, int trig_idx, int enable, int sence_idx, void *arg), void *arg) {
 	json_t *devs = json_object_get(arm_root, "devices");
 	if (devs == NULL || !json_is_array(devs)) {
 		return -1;
@@ -113,7 +117,7 @@ int arm_dev_foreach(int (*cb)(char *modelstr, char *type, char *mac, int trig_id
 			continue;
 		}
 		if (cb != NULL) {
-			cb((char *)modelstr, (char *)type, (char *)mac, trig_idx, enable, sence_idx);
+			cb((char *)modelstr, (char *)type, (char *)mac, trig_idx, enable, sence_idx, arg);
 		}
 	}
 	return 0;
@@ -221,6 +225,32 @@ int arm_dab_device(char *mac) {
 	json_object_set_new(dev, "enable", json_integer(0));
 	return 0;
 }
+
+int arm_get_device(char *mac, char *modelstr, char *type, int *enable, int *trig_idx, int *sence_idx)  {
+	int idx = arm_sch_device(mac);
+	if (idx < 0) {
+		return -1;
+	}
+
+	json_t *devs = json_object_get(arm_root, "devs");
+	if (devs == NULL || !json_is_array(devs)) {
+		return -2;
+	}
+
+	json_t *dev = json_array_get(devs, idx);
+	if (dev == NULL) {
+		return -3;
+	}
+
+	modelstr[0] = 0;
+	type[0] = 0;
+	json_get_int(dev, "enable", enable);
+	json_get_int(dev, "trig_idx", trig_idx);
+	json_get_int(dev, "sence", sence_idx);
+
+	return 0;
+}
+
 int arm_grp_device(char *mac, int _idx) {
 	int idx = arm_sch_device(mac);
 	if (idx < 0) {
@@ -398,6 +428,70 @@ int arm_init(const char *afile) {
 	return arm_load();
 }
 
-int arm_handler_msg(int type, char *msg) {
+int do_action(char *modelstr, char *type, char *mac, int trig_idx, int enable, int sence_idx, void *arg) {
+#if 0
+	int _sence_idx = (int)arg;
+	
+	if (_sence_idx != sence_idx) {
+		return 0;
+	}
+
+	json_t *action = arm_get_action_by_idx(mac, action_idx);
+	
+	char *attr	= json_get_string(action, "attr");
+	char *value	= json_get_value(action, "value");
+
+	arm_log_info("do action..., %s,%s", attr, value);
+	arm_send_message(mac, attr, value);
+#endif
+	
+	return 0;
+}
+
+int arm_handler_msg(int type, char *modelstr, char *_type, char *mac, char *attr, int ep, char *value) {
+
+#if 0
+	int		enable = -1;
+	int		trig_idx = -1;
+	int		sence_idx = -1;
+	char	modelstr[32];
+	char	type[8];
+	
+	int ret = arm_gab_device(mac, modelstr, type, &enable, &trig_idx, &sence_idx);
+	if (ret < 0) {
+		arm_log_warn("no care device!");
+		return 0;
+	}
+
+	if (enable < 0 || enable == 0) {
+		arm_log_warn("no care device: 1");
+		return 0;
+	}
+	
+
+	if (sence_idx <= 0) { //start with 1
+		arm_log_warn("no care device: 2");
+		return 0;
+	}
+
+	json_t *trig = arm_get_trigger_condition_by_idx(modelstr, type, mac);
+	
+	const char *attr	= json_get_string(trig, "attr");
+	const char *value	= json_get_string(trig, "value");
+
+	if (strcmp(attr, attr) != 0) {
+		arm_log_warn("not care attr!");
+		return 0;
+	}
+	
+
+	if (strcmp(attr, attr) != 0) {
+		arm_log_warn("not care attr status!");
+		return 0;
+	}
+
+	arm_dev_foreach(do_action, (void *)sence_idx);
+#endif
+	
 	return 0;
 }

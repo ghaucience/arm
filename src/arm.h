@@ -39,14 +39,15 @@ typedef struct stArmSence {
 char *arm_get_name(char *_modelstr, char *_type) ;
 json_t* arm_get_trigger_conditions(char *name, int *cnt) ;
 json_t *arm_get_trigger_condition_by_idx(char *_name, int idx) ;
+json_t *arm_get_action_by_idx(char *name, int idx);
 
-int arm_dev_foreach(int (*cb)(char *modelstr, char *type, char *mac, int trig_idx, int enable, int sence_idx)) ;
+int arm_dev_foreach(int (*cb)(char *modelstr, char *type, char *mac, int trig_idx, int enable, int sence_idx, void *arg), void *arg);
 int arm_sch_device(char *_mac) ;
 int arm_add_device(char *mac, char *modelstr, char *type, int enable, int trig_idx, int sence_idx) ;
 int arm_del_device(char *mac) ;
 int arm_eab_device(char *mac) ;
-int arm_dab_device(char *mac) ;
 int arm_grp_device(char *mac, int idx) ;
+int arm_get_device(char *mac, char *modelstr, char *type, int *enable, int *trig_idx, int *sence_idx) ;
 
 int arm_sce_foreach(int (*cb)(char *name, int enable, int idx, char *action) );
 int arm_sch_sence(char *_name) ;
@@ -60,18 +61,18 @@ int arm_load() ;
 int arm_save() ;
 int arm_init(const char *afile) ;
 
-int arm_handler_msg(int type, char *msg) ;
+int arm_handler_msg(int type, char *modelstr, char *_type, char *mac, char *attr, int ep, char *value);
 
 /*
 {
 	"devnames": [
-		{"modelstr": "Mose", "type":"1212", "name":"Montion Sensor", "devconds":[{"attr":"devce.onoff", "value":"0"}, {"attr":"device.light.onoff", "value":1"}]},
+		{"modelstr": "Mose", "type":"1212", "name":"Montion Sensor", "devconds":[{"attr":"devce.onoff", "value":"0"}, {"attr":"device.light.onoff", "value":1"}], "actions":[{"attr":"device.off", "value":2}]},
 	],
 	"devices": [
-		{"modelstr": "Mose", "type":"1212", "mac":"0102030405060708", "trig_idx":1, "enable":1, "sence_idx":1},
+		{"modelstr": "Mose", "type":"1212", "mac":"0102030405060708", "trig_idx":1, "action_idx": 1, "enable":1, "sence_idx":1},
 	],
 	"sences":	[
-		{"name":"KitchAlarm", "enable":1, "idx":1, "action":[{"attr":"device.off", "value":2}]}
+		{"name":"KitchAlarm", "enable":1, "idx":1}
 	],
 }
 
