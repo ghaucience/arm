@@ -134,6 +134,7 @@ license you like.
 
 #include <cstring>
 #include <memory>
+#include <iostream>
 
 #pragma pack(push, 8)
 
@@ -290,7 +291,8 @@ extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
                                               const char* format, ...);
 #define jsoncpp_snprintf msvc_pre1900_c99_snprintf
 #else
-#define jsoncpp_snprintf std::snprintf
+//#define jsoncpp_snprintf std::snprintf
+#define jsoncpp_snprintf snprintf
 #endif
 
 // If JSON_NO_INT64 is defined, then Json only support C++ "int" type for

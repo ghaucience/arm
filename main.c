@@ -20,6 +20,8 @@
 #include "schedule.h"
 #include "simlog.h"
 
+#include "armpp.h"
+
 static int  use_cmd		= 0;
 static char *version_path = "/etc/config/dusun/arm/version";
 
@@ -123,6 +125,8 @@ static int  write_version(const char *verfile) {
 
 static void run_loop() {
 	log_info(" ");
+
+	armpp_init();
 
 	while (1) {
 		/**> loop */

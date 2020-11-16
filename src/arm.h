@@ -75,7 +75,6 @@ int arm_handler_msg(int type, char *modelstr, char *_type, char *mac, char *attr
 		{"name":"KitchAlarm", "enable":1, "idx":1}
 	],
 }
-
 */
 #endif
 

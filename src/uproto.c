@@ -56,7 +56,6 @@ static stUHandler_t uhs[] = {
 
 	{"GREENPOWR", "GATEWAY", "reportAttribute", "...",						NULL},
 	{"ZWAVE",			"GATEWAY", "reportAttribute", "...",						NULL},
-
 };
 
 static int _uproto_handler_cmd(const char *from, 
@@ -201,6 +200,58 @@ int uproto_handler_ubus_event_general(const char *msg) {
 	
 	return 0;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+static json_t *uproto_make_msg(const char *dst, const char *submac, const char *attr, const char *operation, void *jvalue, const char *uuid) {
+	json_t *jumsg = json_object();
+
+	const char *from				= "ARM";
+	const char *to					= dst;
+	const char *deviceCode	= "00000";
+	const char *type				= "cmd";
+	int ctime								= time(NULL); 
+	char mac[32];             system_get_mac(mac, sizeof(mac));
+	char macstr[32];
+	strcpy(macstr, mac);
+
+	json_object_set_new(jumsg, "from", json_string(from));
+	json_object_set_new(jumsg, "to", json_string(to));
+	json_object_set_new(jumsg, "deviceCode", json_string(deviceCode));
+	json_object_set_new(jumsg, "mac", json_string(macstr));
+	json_object_set_new(jumsg, "type", json_string(type));
+	json_object_set_new(jumsg, "time", json_integer(ctime));
+	json_t *jdata = json_object(); json_object_set_new(jumsg, "data", jdata); {
+		json_object_set_new(jdata, "id",				json_string(uuid));
+		json_object_set_new(jdata, "command",		json_string(operation));
+		json_t *jarg = json_object(); json_object_set_new(jdata, "arguments", jarg);{
+			if (submac == NULL) {
+				json_object_set_new(jarg, "mac",				json_string(macstr));
+			} else {
+				json_object_set_new(jarg, "mac",				json_string(submac));
+			}
+			json_object_set_new(jarg, "attribute",	json_string(attr));
+			json_object_set_new(jarg, "value",			jvalue);
+		}
+	}
+	return jumsg;
+}
+
+int uproto_call(const char *dst, const char *mac, const char *attr, const char *operation, void *jvalue, int timeout, const char *uuid) {
+	json_t *jcmd = uproto_make_msg(dst, mac, attr, operation, jvalue, uuid);
+	if (jcmd != NULL) {
+		const char * s = json_dumps(jcmd, 0);
+		if (s != NULL) {
+			char dbuf[64];
+			sprintf(dbuf, "DS.%s", dst);
+			ubus_send(dbuf, s);
+			free((char *)s);
+		}
+		json_decref(jcmd);
+	}
+	return 0;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**

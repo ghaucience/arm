@@ -33,7 +33,8 @@ MKDIR		:= mkdir -p
 TARGET_CFLAGS							:= -Wall -g -O2  
 TARGET_CFLAGS							+= -I$(ROOTDIR)/gecko -I$(ROOTDIR)/ble/include/security
 TARGET_CFLAGS							+= -I$(ROOTDIR)/src
-TARGET_CFLAGS							+= -fPIC -DJSON_IS_AMALGAMATION
+#TARGET_CFLAGS							+= -fPIC -DJSON_IS_AMALGAMATION
+TARGET_CFLAGS							+= -fPIC 
 #TARGET_CFLAGS							+= -fpermissive
 TARGET_CFLAGS							+= $(CROSS_CFLAGS) 
 
@@ -55,8 +56,9 @@ srcs	+= $(ROOTDIR)/src/util.c
 srcs 	+= $(ROOTDIR)/src/json_parser.c
 srcs 	+= $(ROOTDIR)/src/uproto.c
 srcs	+= $(ROOTDIR)/src/ubus.c
-srcs	+= $(ROOTDIR)/src/arm.c
+#srcs	+= $(ROOTDIR)/src/arm.c
 srcs	+= $(ROOTDIR)/src/jsoncpp.cpp
+srcs	+= $(ROOTDIR)/src/armpp.cpp
 
 srcs  := $(subst .cpp,.c,$(srcs))
 objs 	:= $(subst $(ROOTDIR),$(WORKDIR), $(subst .c,.o,$(srcs)))
@@ -82,4 +84,4 @@ clean:
 	rm -rf ./build
 
 scp:
-	scp -P2204 $(WORKDIR)/arm root@192.168.0.230:/tmp
+	scp -P2201 $(WORKDIR)/arm root@192.168.0.230:/tmp
