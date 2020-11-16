@@ -4,12 +4,14 @@
                 {
                         "attr" : "device.onoff",
                         "idx" : 1,
-                        "value" : {"value":0}
+                        "value" : {"value":0},
+												"name" : "Close"
                 },
                 {
                         "attr" : "device.onoff",
                         "idx" : 2,
-                        "value" : {"value":1}
+                        "value" : {"value":1},
+												"name" : "Open"
                 }
         ],
         "conds" : 
@@ -17,12 +19,20 @@
                 {
                         "attr" : "device.meter.onoff",
                         "idx" : 1,
-                        "value" : "0"
+                        "value" : "0",
+												"name"	: "Close"
                 },
                 {
                         "attr" : "device.meter.onoff",
                         "idx" : 2,
-                        "value" : "1"
+                        "value" : "1",
+												"name"	: "Open"
+                },
+                {
+                        "attr" : "device.zone_status",
+                        "idx" : 3,
+                        "value" : "1",
+												"name"	: "Motion"
                 }
         ],
         "devices" : 
