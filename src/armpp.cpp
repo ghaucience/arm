@@ -3,8 +3,12 @@
 #include <fstream>
 #include "json.h"
 #include "simlog.h"
+#include "jansson.h"
+#include "uproto.h"
 
 #include "armpp.h"
+
+#include "system.h"
 
 using namespace std;
 
@@ -182,19 +186,43 @@ int armpp_handle_msg(char *modelstr, char *type, char *mac, char *attr, int ep, 
 			continue;
 		}
 		Json::Value action = armpp_get_dev_action(d["action_idx"].asInt());
-		log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), action["value"].asString().c_str(), d["mac"].asString().c_str());
+		log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), action["value"].toStyledString().c_str(), d["mac"].asString().c_str());
 
+		char uuid[64];
+		sprintf(uuid, "%d", rand()%1000000);
 
-		#if 0
-			//uproto_call(const char *_mac, const char *attr, const char *operation, void *jvalue, int timeout, const char *uuid);
-			uproto_call(d["mac"].asString().c_str(), 
+		json_error_t error;
+		json_t *jvalue = json_loads(action["value"].toStyledString().c_str(), 0, &error);
+		if (jvalue == NULL) {
+			log_warn("error action value");
+			continue;
+		}
+
+		uproto_call("CLOUD", "GREENPOWER",
+								d["mac"].asString().c_str(), 
 								action["attr"].asString().c_str(), 
 								"setAttribute",
-								action["value"].asString().c_str(),
+								jvalue,
 								0,
-								"X_");
-		#endif
+								uuid);
 	}
 
+	char uuid[64];
+	sprintf(uuid, "%d", rand()%1000000);
+
+	json_error_t error;
+	json_t *jvalue = json_loads(sence.toStyledString().c_str(), 0, &error);
+	if (jvalue == NULL) {
+		return 0;
+	}
+	char gwmac[32];
+	system_get_mac(gwmac, sizeof(gwmac));
+	uproto_call("ARM", "GATEWAY",
+			gwmac,
+			"arm.sence.triggered", 
+			"reportAttribute",
+			jvalue,
+			0,
+			uuid);
 	return 0;
 }

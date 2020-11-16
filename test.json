@@ -1,5 +1,31 @@
 {
-        "devices" :
+        "actions" : 
+        [
+                {
+                        "attr" : "device.onoff",
+                        "idx" : 1,
+                        "value" : {"value":0}
+                },
+                {
+                        "attr" : "device.onoff",
+                        "idx" : 2,
+                        "value" : {"value":1}
+                }
+        ],
+        "conds" : 
+        [
+                {
+                        "attr" : "device.meter.onoff",
+                        "idx" : 1,
+                        "value" : "0"
+                },
+                {
+                        "attr" : "device.meter.onoff",
+                        "idx" : 2,
+                        "value" : "1"
+                }
+        ],
+        "devices" : 
         [
                 {
                         "action_idx" : 0,
@@ -20,40 +46,10 @@
                         "type" : "1212"
                 }
         ],
-		
-				"actions" :
-						[
-						{
-							"attr" : "device.onoff",
-							"value" : "0",
-							"idx": 1
-						},
-						{
-							"attr" : "device.onoff",
-							"value" : "1",
-							"idx": 2
-						}
-
-				],
-				"conds" :
-						[
-						{
-							"attr" : "device.meter.onoff",
-							"value" : "0",
-							"idx": 1
-						},
-						{
-							"attr" : "device.meter.onoff",
-							"value" : "1",
-							"idx": 2
-						}
-
-				],
-
-        "devnames" :
+        "devnames" : 
         [
                 {
-	                      "modelstr" : "SmartPlug",
+                        "modelstr" : "SmartPlug",
                         "name" : "Motion Sensor",
                         "type" : "1212"
                 },
@@ -62,9 +58,8 @@
                         "name" : "Motion Sensor",
                         "type" : "1212"
                 }
-
         ],
-        "sences" :
+        "sences" : 
         [
                 {
                         "enable" : 1,

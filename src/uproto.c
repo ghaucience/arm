@@ -258,10 +258,10 @@ int uproto_handler_ubus_event_general(const char *msg) {
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static json_t *uproto_make_msg(const char *dst, const char *submac, const char *attr, const char *operation, void *jvalue, const char *uuid) {
+static json_t *uproto_make_msg(const char *src, const char *dst, const char *submac, const char *attr, const char *operation, void *jvalue, const char *uuid) {
 	json_t *jumsg = json_object();
 
-	const char *from				= "ARM";
+	const char *from				= src;
 	const char *to					= dst;
 	const char *deviceCode	= "00000";
 	const char *type				= "cmd";
@@ -292,8 +292,8 @@ static json_t *uproto_make_msg(const char *dst, const char *submac, const char *
 	return jumsg;
 }
 
-int uproto_call(const char *dst, const char *mac, const char *attr, const char *operation, void *jvalue, int timeout, const char *uuid) {
-	json_t *jcmd = uproto_make_msg(dst, mac, attr, operation, jvalue, uuid);
+int uproto_call(const char *src, const char *dst, const char *mac, const char *attr, const char *operation, void *jvalue, int timeout, const char *uuid) {
+	json_t *jcmd = uproto_make_msg(src, dst, mac, attr, operation, jvalue, uuid);
 	if (jcmd != NULL) {
 		const char * s = json_dumps(jcmd, 0);
 		if (s != NULL) {
@@ -303,6 +303,8 @@ int uproto_call(const char *dst, const char *mac, const char *attr, const char *
 			free((char *)s);
 		}
 		json_decref(jcmd);
+	} else {
+		json_decref(jvalue);
 	}
 	return 0;
 }
