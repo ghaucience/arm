@@ -56,18 +56,18 @@ static inline char *log_time_str() {
 }
 #define TIME_NOW()	
 
-#define log_info(...)			(printf(LOG_FMT_BOLD(LOG_GREEN)  "[%s][INF]" LOG_FMT_CLEAR "%s::%46s() " , log_time_str(), appname, __func__), printf(__VA_ARGS__), printf("\n"))
-#define log_debug(...)		(printf(LOG_FMT_BOLD(LOG_BLUE)	 "[%s][DBG]" LOG_FMT_CLEAR "%s::%46s() " , log_time_str(), appname, __func__), printf(__VA_ARGS__), printf("\n"))
-#define log_err(...)			(printf(LOG_FMT_BOLD(LOG_RED)		 "[%s][ERR]" LOG_FMT_CLEAR "%s::%46s() " , log_time_str(), appname, __func__), printf(__VA_ARGS__), printf("\n"))
-#define log_warn(...)			(printf(LOG_FMT_BOLD(LOG_YELLOW) "[%s][WRN]" LOG_FMT_CLEAR "%s::%46s() " , log_time_str(), appname, __func__), printf(__VA_ARGS__), printf("\n"))
+#define log_info(...)			(printf(LOG_FMT_BOLD(LOG_GREEN)  "[%s][INF]" LOG_FMT_CLEAR "%s::%36s() " , log_time_str(), appname, __func__), printf(__VA_ARGS__), printf("\n"))
+#define log_debug(...)		(printf(LOG_FMT_BOLD(LOG_BLUE)	 "[%s][DBG]" LOG_FMT_CLEAR "%s::%36s() " , log_time_str(), appname, __func__), printf(__VA_ARGS__), printf("\n"))
+#define log_err(...)			(printf(LOG_FMT_BOLD(LOG_RED)		 "[%s][ERR]" LOG_FMT_CLEAR "%s::%36s() " , log_time_str(), appname, __func__), printf(__VA_ARGS__), printf("\n"))
+#define log_warn(...)			(printf(LOG_FMT_BOLD(LOG_YELLOW) "[%s][WRN]" LOG_FMT_CLEAR "%s::%36s() " , log_time_str(), appname, __func__), printf(__VA_ARGS__), printf("\n"))
 
-#define log_debug_hex(str, buf, len) (printf(LOG_FMT_BOLD(LOG_YELLOW)  "[%s][DBG]" LOG_FMT_CLEAR "%s::%46s() ", log_time_str(), appname, __func__), printf("%s", str), ({ \
+#define log_debug_hex(str, buf, len) (printf(LOG_FMT_BOLD(LOG_YELLOW)  "[%s][DBG]" LOG_FMT_CLEAR "%s::%36s() ", log_time_str(), appname, __func__), printf("%s", str), ({ \
 	int i = 0; \
-	printf(LOG_FMT_BOLD(LOG_CYAN) "\n[HEX]" LOG_FMT_CLEAR "%s::%46s() ", appname, __func__); \
+	printf(LOG_FMT_BOLD(LOG_CYAN) "\n[HEX]" LOG_FMT_CLEAR "%s::%36s() ", appname, __func__); \
 	for (i = 0; i < len; i++) { \
 		printf("[%02X] ", (buf)[i]&0xff);\
 		if ( (i+1)% 20 == 0) { \
-			printf(LOG_FMT_BOLD(LOG_CYAN) "\n[HEX]" LOG_FMT_CLEAR "%s::%46s() ", appname, __func__); \
+			printf(LOG_FMT_BOLD(LOG_CYAN) "\n[HEX]" LOG_FMT_CLEAR "%s::%36s() ", appname, __func__); \
 		} \
 	}	 \
 }), printf("\n"))

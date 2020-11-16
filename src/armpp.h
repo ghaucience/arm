@@ -7,7 +7,7 @@ extern "C" {
 
 
 int armpp_init();
-int armpp_handler_msg(int type, char *modelstr, char *_type, char *mac, char *attr, int ep, char *value);
+int armpp_handle_msg(char *modelstr, char *_type, char *mac, char *attr, int ep, char *value);
 
 #ifdef __cplusplus
 }

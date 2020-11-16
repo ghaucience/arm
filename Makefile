@@ -84,4 +84,4 @@ clean:
 	rm -rf ./build
 
 scp:
-	scp -P2201 $(WORKDIR)/arm root@192.168.0.230:/tmp
+	scp -P2201 $(WORKDIR)/arm $(ROOTDIR)/test.json root@192.168.0.230:/tmp

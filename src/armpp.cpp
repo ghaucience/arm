@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "json.h"
+#include "simlog.h"
 
 #include "armpp.h"
 
@@ -70,58 +71,50 @@ static int armpp_make_test_json() {
 	return 0;
 }
 
-#if 0
-{
-        "devices" : 
-        [
-                {
-                        "action_idx" : 1,
-                        "enable" : 1,
-                        "mac" : "0102030405060708",
-                        "modelstr" : "Mose",
-                        "sence_idx" : 1,
-                        "trig_idx" : 1,
-												"action_idx" : 1,
-                        "type" : "1212"
-                }
-        ],
-        "devnames" : 
-        [
-                {
-                        "actions" : 
-                        [
-                                {
-                                        "attr" : "device.light.onoff",
-                                        "value" : "1",
-																				"idx": 1
-                                }
-                        ],
-                        "conds" : 
-                        [
-                                {
-                                        "attr" : "device.onoff",
-                                        "value" : "0",
-																				"idx": 1
-                                }
-                        ],
-                        "modelstr" : "Mose",
-                        "name" : "Motion Sensor",
-                        "type" : "1212"
-                }
-        ],
-        "sences" : 
-        [
-                {
-                        "enable" : 1,
-                        "idx" : 1,
-                        "name" : "KitchAlarm"
-                }
-        ]
+static Json::Value armpp_get_device(string mac) {
+	for (Json::Value::iterator it=root["devices"].begin(); it!=root["devices"].end(); ++it) {
+		Json::Value d = *it;
+		if (d["mac"].asString().compare(mac) != 0) {
+			continue;
+		}
+		return d;
+	}
+	return Json::Value();
 }
-#endif
+static Json::Value armpp_get_group(int idx) {
+	for (Json::Value::iterator it=root["sences"].begin(); it!=root["sences"].end(); ++it) {
+		Json::Value s = *it;
+		if (s["idx"].asInt() != idx) {
+			continue;
+		}
+		return s;
+	}	
+	return Json::Value();
+}
+static Json::Value armpp_get_dev_cond(int trig_idx) {
+	for (Json::Value::iterator it=root["conds"].begin(); it!=root["conds"].end(); ++it) {
+		Json::Value c = *it;
+		if (c["idx"].asInt() != trig_idx) {
+			continue;
+		}
+		return c;
+	}
+	return Json::Value();
+}
+static Json::Value armpp_get_dev_action(int action_idx) {
+	for (Json::Value::iterator it=root["actions"].begin(); it!=root["actions"].end(); ++it) {
+		Json::Value a = *it;
+		if (a["idx"].asInt() != action_idx) {
+			continue;
+		}
+		return a;
+	}
+	return Json::Value();
+}
 
 int armpp_init() {
-	int ret = armpp_read_file(root, "/root/test.json");
+	//int ret = armpp_read_file(root, "/root/test.json");
+	int ret = armpp_read_file(root, "/tmp/test.json");
 	if (ret != 0) {
 		cout << "load file filed:" << ret << endl;
 		return -1;
@@ -130,108 +123,49 @@ int armpp_init() {
 	return 0;
 }
 
-Json::Value armpp_get_device(string mac) {
-	for (Json::Value::iterator it=root["devices"].begin(); it!=root["devices"].end(); ++it) {
-		Json::Value d = *it;
-		if (d["mac"].asString().compare(mac) != 0) {
-			continue;
-		}
-		return d;
-	}
-	return 0;
-}
-Json::Value armpp_get_group(int idx) {
-	for (Json::Value::iterator it=root["sences"].begin(); it!=root["sences"].end(); ++it) {
-		Json::Value s = *it;
-		if (s["idx"].asInt() != idx) {
-			continue;
-		}
-		return s;
-	}	
-	return 0;	
-}
-Json::Value armpp_get_dev_cond(string modelstr, string type, int trig_idx) {
-	for (Json::Value::iterator it=root["devnames"].begin(); it!=root["devnames"].end(); ++it) {
-		Json::Value dn = *it;
-		if (dn["modelstr"].asString().compare(modelstr) != 0) {
-			continue;
-		}
-		if (dn["type"].asString().compare(type) != 0) {
-			continue;
-		}
-		for (Json::Value::iterator it=dn["conds"].begin(); it!=dn["conds"].end(); ++it) {
-			Json::Value c = *it;
-			if (c["idx"].asInt() != trig_idx) {
-				continue;
-			}
-			return c;
-		}
-	}
-	return 0;
-}
-Json::Value armpp_get_dev_action(string modelstr, string type, int action_idx) {
-	for (Json::Value::iterator it=root["devnames"].begin(); it!=root["devnames"].end(); ++it) {
-		Json::Value dn = *it;
-		if (dn["modelstr"].asString().compare(modelstr) != 0) {
-			continue;
-		}
-		if (dn["type"].asString().compare(type) != 0) {
-			continue;
-		}
-		for (Json::Value::iterator it=dn["actions"].begin(); it!=dn["actions"].end(); ++it) {
-			Json::Value a = *it;
-			if (a["idx"].asInt() != action_idx) {
-				continue;
-			}
-			return a;
-		}
-	}
-	return 0;
-}
-int armpp_handler_msg(char *modelstr, char *type, char *mac, char *attr, int ep, char *value) {
-	Json::Value devices		= root["devices"];
-	Json::Value devnames	= root["devnames"];
+int armpp_handle_msg(char *modelstr, char *type, char *mac, char *attr, int ep, char *value) {
+	log_info("%s", __func__);
 
 	Json::Value dev = armpp_get_device(mac);
 	if (dev.isNull()) {
-		cout << "dev :" << mac << " not exsit!" << endl;
+		log_warn("dev:%s not exsit", mac);
 		return 0;
 	}
 
 	if (dev["enable"].asInt() <= 0) {
-		cout << "dev :" << mac << " disabled!" << endl;
+		log_warn("dev:%s disabeld", mac);
 		return 0;
 	}
 	
 	if (dev["sence_idx"].asInt() <= 0) {
-		cout << "dev :" << mac << " no sence" << endl;
+		log_warn("dev:%s no sence", mac);
 		return 0;
 	}
 	
 	Json::Value sence = armpp_get_group(dev["sence_idx"].asInt());
 	if (sence.isNull()) {
-		cout << "dev :" << mac << "'s sence not exsit" << endl;
+		log_warn("dev:%s no sence", mac);
 		return 0;
 	}
 	if (sence["enable"].asInt() <= 0) {
-		cout << "dev :" << mac << "'s sence disabled!" << endl;
+		log_warn("dev:%s sence disabled", mac);
 		return 0;
 	}
 	
 
-	Json::Value cond = armpp_get_dev_cond(modelstr, type, dev["trig_idx"].asInt());
+	Json::Value cond = armpp_get_dev_cond(dev["trig_idx"].asInt());
 	if (cond.isNull()) {
-		cout << "dev :" << mac << "'s cond null!" << endl;
+		log_warn("dev:%s cond null", mac);
 		return 0;
 	}
 	
 	if (cond["attr"].asString().compare(attr) != 0) {
-		cout << "dev :" << mac << "'s not care attr!" << endl;
+		log_warn("dev:%s not care attr", mac);
 		return 0;
 	}
 
 	if (cond["value"].asString().compare(value) != 0) {
-		cout << "dev :" << mac << "'s not care value!" << endl;
+		log_warn("dev:%s not care attr value", mac);
 		return 0;
 	}
 
@@ -244,12 +178,12 @@ int armpp_handler_msg(char *modelstr, char *type, char *mac, char *attr, int ep,
 		if (d["sence_idx"].asInt() != sence["idx"].asInt()) {
 			continue;
 		}
-		Json::Value action = armpp_get_dev_action(d["modelstr"].asString(), d["type"].asString(), d["action_idx"].asInt());
-
-		if (action.isNull()) {
+		if (d["action_idx"].asInt() <= 0) {
 			continue;
 		}
-		
+		Json::Value action = armpp_get_dev_action(d["action_idx"].asInt());
+		log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), action["value"].asString().c_str(), d["mac"].asString().c_str());
+
 
 		#if 0
 			//uproto_call(const char *_mac, const char *attr, const char *operation, void *jvalue, int timeout, const char *uuid);

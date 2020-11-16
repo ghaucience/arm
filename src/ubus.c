@@ -50,11 +50,10 @@ static void ubus_receive_event(struct ubus_context *ctx,struct ubus_event_handle
 	const char *type,struct blob_attr *msg) {
 	char *str;
 
-	ubus_log_info("-----------------[ubus msg]: handler ....-----------------");
 #if 0
 	str = blobmsg_format_json(msg, true);
 	if (str != NULL) {
-		ubus_log_info("[ubus msg]: [%s]", str);
+		//ubus_log_info("[ubus msg]: [%s]", str);
 
 		json_error_t error;
 		json_t *jmsg = json_loads(str, 0, &error);
@@ -78,7 +77,7 @@ static void ubus_receive_event(struct ubus_context *ctx,struct ubus_event_handle
 	log_debug("-----------------[ubus msg]: handler ....-----------------\n");
 	str = blobmsg_format_json(msg, true);
 	if (str != NULL) {
-		log_debug("[ubus msg]: [%s]\n", str);
+		//log_debug("[ubus msg]: [%s]\n", str);
 
 		json_error_t error;
 		json_t *jmsg = json_loads(str, 0, &error);

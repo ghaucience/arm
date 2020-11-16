@@ -11,6 +11,8 @@
 #include "system.h"
 #include "util.h"
 
+#include "armpp.h"
+
 #define uproto_log_warn				log_warn
 #define uproto_log_err				log_err
 #define uproto_log_info				log_info
@@ -54,8 +56,8 @@ static stUHandler_t uhs[] = {
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.dab_device",						set_dab_device},
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.grp_device",						set_grp_device},
 
-	{"GREENPOWR", "GATEWAY", "reportAttribute", "...",						NULL},
-	{"ZWAVE",			"GATEWAY", "reportAttribute", "...",						NULL},
+	{"GREENPOWR", "CLOUD", "reportAttribute", "...",						NULL},
+	{"ZWAVE",			"CLOUD", "reportAttribute", "...",						NULL},
 };
 
 static int _uproto_handler_cmd(const char *from, 
@@ -68,8 +70,10 @@ static int _uproto_handler_cmd(const char *from,
 		const char *cmdmac,
 		const char *attr,
 		json_t *value) {
+	#if 0
 	uproto_log_info("from:%s, to:%s, ctype:%s, mac:%s, dtime:%d, uuid:%s, command:%s, cmdmac:%s, attr:%s, value:%p",
 			from, to, ctype, mac, dtime, uuid, command, cmdmac, attr, value);
+	#endif
 
 	int cnt = sizeof(uhs)/sizeof(uhs[0]);
 	int i = 0;
@@ -77,29 +81,29 @@ static int _uproto_handler_cmd(const char *from,
 	stUHandler_t *_uh = NULL;
 	for (i = 0; i < cnt; i++) {
 		stUHandler_t *uh = &uhs[i];
-		uproto_log_debug("from:%s, to:%s, type:%s, attr:%s, func:%p", uh->from, uh->to, uh->type, uh->attr, uh->func);
+		//uproto_log_debug("from:%s, to:%s, type:%s, attr:%s, func:%p", uh->from, uh->to, uh->type, uh->attr, uh->func);
 		if (strcmp(uh->from, from) != 0) {
-			uproto_log_warn("from not same");
+			//uproto_log_warn("from not same");
 			continue;
 		}
 		if (strcmp(uh->to, to) != 0) {
-			uproto_log_warn("to not same");
+			//uproto_log_warn("to not same");
 			continue;
 		}
 	#if 0
 		if (strcmp(uh->type, ctype) != 0) {
-			uproto_log_warn("type not same");
+			//uproto_log_warn("type not same");
 			continue;
 		}
 	#else
 		if (strcmp(uh->type, command) != 0) {
-			uproto_log_warn("type not same");
+			//uproto_log_warn("type not same");
 			continue;
 		}
 	#endif
 		if (uh->attr != NULL) {
 			if (strcmp(uh->attr, attr) != 0) {
-				uproto_log_warn("attr not same");
+				//uproto_log_warn("attr not same");
 				continue;
 			}
 		} else {
@@ -109,10 +113,10 @@ static int _uproto_handler_cmd(const char *from,
 		break;
 	}
 	if (_uh == NULL) {
-		uproto_log_warn("not support from:%s, to:%s, type:%s, attr:%s", from, to, ctype, attr);
+		//uproto_log_warn("not support from:%s, to:%s, type:%s, attr:%s", from, to, ctype, attr);
 		return -1;
 	}
-	uproto_log_info("handler from:%s, to:%s, type:%s, attr:%s, %p", from, to, ctype, attr, _uh->func);
+	//uproto_log_info("handler from:%s, to:%s, type:%s, attr:%s, %p", from, to, ctype, attr, _uh->func);
 	return _uh->func(from, uuid, cmdmac, attr, value);
 }
 
@@ -142,57 +146,108 @@ int uproto_handler_ubus_event_general(const char *msg) {
 		return -2;
 	}
 
-	if (strcmp(ctype, "cmd") != 0) {
+	if (strcmp(ctype, "cmd") != 0 && strcmp(ctype, "reportAttribute") != 0) {
 		uproto_log_warn("not support command type:%s", ctype);
 		json_decref(jpkt);
 		return -3;
 	}
+	
+	const char *command = NULL;
+	const char *id			= NULL;
+	const char *attribute = NULL;
+	const char *cmdmac = NULL;
+	const char *uuid;
+	json_t *jval = NULL;
+	if (strcmp(ctype, "cmd") == 0) {
+		command = json_get_string(jdata, "command");
+		if (command == NULL) {
+			uproto_log_warn("no command seg!");
+			json_decref(jpkt);
+			return -4;
+		}
+		const char *id			= json_get_string(jdata, "id");
+		if (id == NULL && strcmp(command, "setAttribute") == 0) {
+			uproto_log_warn("no id seg!");
+			json_decref(jpkt);
+			return -5;
+		}
+		json_t		 *jarg		= json_object_get(jdata, "arguments");
+		if (jarg == NULL) {
+			uproto_log_warn("no arguments seg!");
+			json_decref(jpkt);
+			return -5;
+		}
 
-	const char *command = json_get_string(jdata, "command");
-	if (command == NULL) {
-		uproto_log_warn("no command seg!");
-		json_decref(jpkt);
-		return -4;
-	}
+		attribute = json_get_string(jarg, "attribute");
+		if (attribute == NULL) {
+			uproto_log_warn("no attribute !");
+			json_decref(jpkt);
+			return -6;
+		}
 
-	const char *id			= json_get_string(jdata, "id");
-	if (id == NULL) {
-		uproto_log_warn("no id seg!");
-		json_decref(jpkt);
-		return -5;
-	}
+		cmdmac = json_get_string(jarg, "mac");
+		if (cmdmac == NULL) {
+			uproto_log_warn("no mac !");
+			json_decref(jpkt);
+			return -7;
+		}
 
-	json_t		 *jarg		= json_object_get(jdata, "arguments");
-	if (jarg == NULL) {
-		uproto_log_warn("no arguments seg!");
-		json_decref(jpkt);
-		return -5;
-	}
+		jval = json_object_get(jarg, "value");
+		if (jval == NULL) {
+			uproto_log_warn("no value !");
+			json_decref(jpkt);
+			return -8;
+		}
+	} else {
+		command = "reportAttribute";
+		id			= "null";
+		attribute = json_get_string(jdata, "attribute");
+		if (attribute == NULL) {
+			uproto_log_warn("no attribute !");
+			json_decref(jpkt);
+			return -6;
+		}
 
-	const char *attribute = json_get_string(jarg, "attribute");
-	if (attribute == NULL) {
-		uproto_log_warn("no attribute !");
-		json_decref(jpkt);
-		return -6;
-	}
+		cmdmac = json_get_string(jdata, "mac");
+		if (cmdmac == NULL) {
+			uproto_log_warn("no mac !");
+			json_decref(jpkt);
+			return -7;
+		}
 
-	const char *cmdmac = json_get_string(jarg, "mac");
-	if (cmdmac == NULL) {
-		uproto_log_warn("no mac !");
-		json_decref(jpkt);
-		return -7;
-	}
+		jval = json_object_get(jdata, "value");
+		if (jval == NULL) {
+			uproto_log_warn("no value !");
+			json_decref(jpkt);
+			return -8;
+		}
+	} 
 
-	json_t *jval = json_object_get(jarg, "value");
-	if (jval == NULL) {
-		uproto_log_warn("no value !");
-		json_decref(jpkt);
-		return -8;
-	}
-
-	uproto_log_info("from:%s,to:%s,type:%s,time:%d,uuid:%s,cmdmac:%s, attr:%s", from, to, ctype, dtime, id, cmdmac, attribute);
+	uproto_log_info("from:%s,to:%s,type:%s,time:%d,uuid:%s,cmdmac:%s, attr:%s, jval:%p", from, to, ctype, dtime, id, cmdmac, attribute, jval);
 	_uproto_handler_cmd(from, to, ctype, mac, dtime, id, command, cmdmac, attribute, jval);
-
+	if (jval != NULL) {
+		//{"data": {"ep": 1, "attribute": "device.meter.power", "mac": "000d6f000be63f63", 
+		// "value": {"unit": "kW", "ep": 1, "value": "0.0000", "ModelStr": "SmartPlug", "battery": 100, "zone": "SmartPlug"}
+		//}
+		char *modelstr = json_get_string(jval, "ModelStr");
+		char *type		 = json_get_string(jval, "type");
+		char *mac			 = cmdmac;
+		char *attr		 = attribute;
+		int		ep = -1;   json_get_int(jval, "ep", &ep);
+		char *value		 = json_get_string(jval, "value");
+		if (value == NULL) {
+			int ival = -1;
+			if (json_get_int(jval, "value", &ival) == 0) {
+				static sval[128];
+				sprintf(sval, "%d", ival);
+				value = sval;
+			}
+		}
+		uproto_log_info("modelstr:%s, type:%s, mac:%s, attr:%s, ep:%d, value:%s", modelstr, type, mac, attr, ep, value);
+		if (value != NULL) {
+			armpp_handle_msg((char *)modelstr, (char *)type, (char *)mac, (char *)attr, ep, (char *)value);
+		}
+	}
 	if (jpkt != NULL) {
 		json_decref(jpkt);
 		jpkt = NULL;

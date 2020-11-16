@@ -14,8 +14,8 @@
 #include <libubus.h>
 #include <jansson.h>
 
-#define LISTEN_PAT "DS.BLE"
-#define SEND_PAT "DS.GATEWAY"
+#define LISTEN_PAT "DS.GATEWAY"
+#define SEND_PAT "DS.GREENPOWER"
 
 
 typedef struct stUbus {

@@ -157,7 +157,7 @@ static void run_loop() {
 			schedue_exec();	
 		}
 		
-		//log_debug("gfd:%d, ufd:%d\n", gfd, ufd);
+		log_debug("next:%lld", next);
 		tv.tv_sec = next / 1000;
 		tv.tv_usec = (next % 1000) * 1000;
 		int ret = select(maxfd + 1, &fds, NULL, NULL, &tv);
