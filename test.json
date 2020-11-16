@@ -46,17 +46,17 @@
                         "type" : "1212"
                 }
         ],
-        "devnames" : 
+        "namemaps" : 
         [
                 {
                         "modelstr" : "SmartPlug",
-                        "name" : "Motion Sensor",
-                        "type" : "1212"
+                        "type" : "1212",
+                        "name" : "Motion Sensor"
                 },
                 {
                         "modelstr" : "SmartOutlet",
-                        "name" : "Motion Sensor",
-                        "type" : "1212"
+                        "type" : "1212",
+                        "name" : "Motion Sensor"
                 }
         ],
         "sences" : 

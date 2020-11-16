@@ -186,13 +186,15 @@ int armpp_handle_msg(char *modelstr, char *type, char *mac, char *attr, int ep, 
 			continue;
 		}
 		Json::Value action = armpp_get_dev_action(d["action_idx"].asInt());
-		log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), action["value"].toStyledString().c_str(), d["mac"].asString().c_str());
+		Json::FastWriter wr;
+		//log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), action["value"].toStyledString().c_str(), d["mac"].asString().c_str());
+		log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), wr.write(action["value"]).c_str(), d["mac"].asString().c_str());
 
 		char uuid[64];
 		sprintf(uuid, "%d", rand()%1000000);
 
 		json_error_t error;
-		json_t *jvalue = json_loads(action["value"].toStyledString().c_str(), 0, &error);
+		json_t *jvalue = json_loads(wr.write(action["value"]).c_str(), 0, &error);
 		if (jvalue == NULL) {
 			log_warn("error action value");
 			continue;
@@ -211,7 +213,8 @@ int armpp_handle_msg(char *modelstr, char *type, char *mac, char *attr, int ep, 
 	sprintf(uuid, "%d", rand()%1000000);
 
 	json_error_t error;
-	json_t *jvalue = json_loads(sence.toStyledString().c_str(), 0, &error);
+	Json::FastWriter wr;
+	json_t *jvalue = json_loads(wr.write(sence).c_str(), 0, &error);
 	if (jvalue == NULL) {
 		return 0;
 	}
