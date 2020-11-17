@@ -83,5 +83,8 @@ clean:
 	rm -rf ./tags
 	rm -rf ./build
 
+install: arm
+	cp ./build/arm ./files/usr/bin/ -rf
+
 scp:
 	scp -P2201 $(WORKDIR)/arm $(ROOTDIR)/files/etc/config/dusun/alarm.json root@192.168.0.230:/tmp
