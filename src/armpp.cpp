@@ -402,7 +402,9 @@ int armpp_del_sence(int idx) {
 		return -1;
 	}
 
-	root["sences"][ix] = Json::Value();
+	armpp_log_info("ix:%d", ix);
+	//root["sences"][ix] = Json::Value();
+	root["sences"].remove(ix);
 	armpp_write_file(root, root_file);
 
 	return 0;
