@@ -23,7 +23,7 @@
 #include "armpp.h"
 
 static int  use_cmd		= 0;
-static char *version_path = "/etc/config/dusun/arm/version";
+static char *version_path = "/etc/config/dusun/alarm/version";
 
 static int parse_args(int argc, char *argv[]);
 static int usage(char *app);

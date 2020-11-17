@@ -39,6 +39,13 @@ local armjson	= jsc.parse(armstr or '{}')
 
 -- !! luci.util.dumptable(armjson)
 
+
+-- !! Add Sence
+uu = f:section(SimpleSection, "Add Sence", translate(""));
+o = uu:option(DummyValue, "Add", translate(""))
+o.template = "admin_dusun/arm"
+
+
 -- !! Security Sences
 --[[
                 {
