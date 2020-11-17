@@ -1,6 +1,12 @@
 #ifndef _AMBER_SCHEDUE_H_
 #define _AMBER_SCHEDUE_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
 typedef unsigned long long _U64_t;
 typedef long long _S64_t;
 
@@ -40,6 +46,10 @@ typedef struct stSchduleEnv {
 
 	struct timer step_timer;
 }stSchduleEnv_t;
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

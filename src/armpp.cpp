@@ -9,6 +9,7 @@
 #include "armpp.h"
 
 #include "system.h"
+#include "schedule.h"
 
 using namespace std;
 
@@ -20,6 +21,8 @@ using namespace std;
 
 
 static Json::Value root;
+static string root_file = "/tmp/test.json";
+static stSchduleTask_t qry_list_task;
 
 static int armpp_write_file(Json::Value &root, string file) {
 #if 1
@@ -75,6 +78,27 @@ static int armpp_make_test_json() {
 	return 0;
 }
 
+static int armpp_generate_device_idx() {
+	int asize		= root["devices"].size();
+
+	for (int i  = 1 ; i <= asize; i++) {
+		int find = 0;
+
+		for (Json::Value::iterator it=root["devices"].begin(); it!=root["devices"].end(); ++it) {
+			Json::Value d = *it;
+			if (d["idx"].asInt() == i) {
+				find = 1;
+				break;
+			}
+		}
+		if (find == 1) {
+			continue;
+		}
+		return i;
+	}
+
+	return asize + 1;
+}
 static Json::Value armpp_get_device(string mac) {
 	for (Json::Value::iterator it=root["devices"].begin(); it!=root["devices"].end(); ++it) {
 		Json::Value d = *it;
@@ -116,18 +140,26 @@ static Json::Value armpp_get_dev_action(int action_idx) {
 	return Json::Value();
 }
 
+
+static void *qry_list_func(void *arg) {
+	system("dusun_ucmd.sh list");
+	schedue_add(&qry_list_task, 1000*60*10, (void*)qry_list_func, 0);
+}
+
 int armpp_init() {
-	//int ret = armpp_read_file(root, "/root/test.json");
-	int ret = armpp_read_file(root, "/tmp/test.json");
+	int ret = armpp_read_file(root, root_file);
 	if (ret != 0) {
 		cout << "load file filed:" << ret << endl;
 		return -1;
 	}
 	cout << root << endl;
+
+	schedue_add(&qry_list_task, 2000, (void*)qry_list_func, 0);
 	return 0;
 }
 
-int armpp_handle_msg(char *modelstr, char *type, char *mac, char *attr, int ep, char *value) {
+
+int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *attr, int ep, char *value) {
 	log_info("%s", __func__);
 
 	Json::Value dev = armpp_get_device(mac);
@@ -227,5 +259,79 @@ int armpp_handle_msg(char *modelstr, char *type, char *mac, char *attr, int ep, 
 			jvalue,
 			0,
 			uuid);
+	return 0;
+}
+
+int armpp_sync_add_device(char *from, char *mac, char *modelstr,  char *type) {
+	armpp_log_info(" ");
+
+	if (string(from).compare("GREENPOWER") == 0) {
+		from = "Zigbee";
+	} else if (string(from).compare("ZWAVE") == 0) {
+		from = "Z-WAVE";
+	} else {
+		armpp_log_warn("not support source!");
+		return 0;
+	}
+
+	Json::Value dev = armpp_get_device(mac);
+	if (!dev.isNull()) {
+		int upflag = 0;
+		if (modelstr != NULL && (dev["modelstr"].isNull() || dev["modelstr"].compare(modelstr) != 0)){
+			upflag = 1;
+			dev["modelstr"] = modelstr;
+		}
+		if (type != NULL && (dev["type"].isNull() || dev["type"].compare(type) != 0)) {
+			upflag = 1;
+			dev["type"] = type;
+		}
+		if (from != NULL && (dev["source"].isNull() || dev["source"].compare(from) != 0)) {
+			upflag = 1;
+			dev["source"] = from;
+		}
+		if (upflag) {
+			cout << root << endl;
+			armpp_write_file(root, root_file);
+		}
+		return 0;
+	}
+	//int idx			= armpp_generate_device_idx();
+	int asize		= root["devices"].size();
+
+	//root["devices"][asize] = Json::Value('{}');
+	root["devices"][asize]["action_idx"] = 0;
+	root["devices"][asize]["enable"]			= 0;
+	root["devices"][asize]["mac"]					= mac;
+	root["devices"][asize]["modelstr"]		= modelstr;
+	root["devices"][asize]["sence_idx"]		= 0;
+	root["devices"][asize]["trig_idx"]		= 0;
+	root["devices"][asize]["type"]				= type;
+	root["devices"][asize]["source"]			= from;
+
+	cout << root << endl;
+	armpp_write_file(root, root_file);
+	return 0;
+}
+
+int armpp_sync_del_device(char *from, char *mac) {
+	armpp_log_info(" ");
+	Json::Value dev = armpp_get_device(mac);
+	if (dev.isNull()) {
+		return 0;
+	}
+	
+	int idx = 0;
+	for (Json::Value::iterator it=root["devices"].begin(); it!=root["devices"].end(); ++it) {
+		Json::Value d = *it;
+		if (d["mac"].asString().compare(mac) != 0) {
+			++idx;
+			continue;
+		}
+		break;
+	}
+
+	root["devices"][idx] = Json::Value();
+	armpp_write_file(root, root_file);
+	
 	return 0;
 }

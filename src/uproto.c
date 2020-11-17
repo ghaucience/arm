@@ -43,6 +43,13 @@ DEF_UHANDLER(set_eab_device);
 DEF_UHANDLER(set_dab_device);
 DEF_UHANDLER(set_grp_device);
 
+DEF_UHANDLER(z3_device_list);
+DEF_UHANDLER(z3_device_added);
+DEF_UHANDLER(z3_device_deleted);
+DEF_UHANDLER(zw_device_list);
+DEF_UHANDLER(zw_device_added);
+DEF_UHANDLER(zw_device_deleted);
+
 static stUHandler_t uhs[] = {
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.add_sence",						set_add_sence},
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.del_sence",						set_del_sence},
@@ -56,8 +63,13 @@ static stUHandler_t uhs[] = {
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.dab_device",						set_dab_device},
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.grp_device",						set_grp_device},
 
-	{"GREENPOWR", "CLOUD", "reportAttribute", "...",						NULL},
-	{"ZWAVE",			"CLOUD", "reportAttribute", "...",						NULL},
+	{"GREENPOWER", "CLOUD", "reportAttribute", "mod.device_list",			z3_device_list},
+	{"GREENPOWER", "CLOUD", "reportAttribute", "mod.new_device_added",	z3_device_added},
+	{"GREENPOWER", "CLOUD", "reportAttribute", "mod.device_deleted",		z3_device_deleted},
+
+	{"ZWAVE",			"GATEWAY", "reportAttribute", "mod.device_list",			zw_device_list},
+	{"ZWAVE",			"GATEWAY", "reportAttribute", "mod.new_device_added",	zw_device_added},
+	{"ZWAVE",			"GATEWAY", "reportAttribute", "mod.device_deleted",		zw_device_deleted},
 };
 
 static int _uproto_handler_cmd(const char *from, 
@@ -156,7 +168,6 @@ int uproto_handler_ubus_event_general(const char *msg) {
 	const char *id			= NULL;
 	const char *attribute = NULL;
 	const char *cmdmac = NULL;
-	const char *uuid;
 	json_t *jval = NULL;
 	if (strcmp(ctype, "cmd") == 0) {
 		command = json_get_string(jdata, "command");
@@ -229,23 +240,25 @@ int uproto_handler_ubus_event_general(const char *msg) {
 		//{"data": {"ep": 1, "attribute": "device.meter.power", "mac": "000d6f000be63f63", 
 		// "value": {"unit": "kW", "ep": 1, "value": "0.0000", "ModelStr": "SmartPlug", "battery": 100, "zone": "SmartPlug"}
 		//}
-		char *modelstr = json_get_string(jval, "ModelStr");
-		char *type		 = json_get_string(jval, "type");
-		char *mac			 = cmdmac;
-		char *attr		 = attribute;
+		const char *modelstr = json_get_string(jval, "ModelStr");
+		const char *type		 = json_get_string(jval, "type");
+		const char *mac			 = cmdmac;
+		const char *attr		 = attribute;
 		int		ep = -1;   json_get_int(jval, "ep", &ep);
-		char *value		 = json_get_string(jval, "value");
+		const char *value		 = json_get_string(jval, "value");
 		if (value == NULL) {
 			int ival = -1;
 			if (json_get_int(jval, "value", &ival) == 0) {
-				static sval[128];
+				static char sval[128];
 				sprintf(sval, "%d", ival);
 				value = sval;
 			}
 		}
 		uproto_log_info("modelstr:%s, type:%s, mac:%s, attr:%s, ep:%d, value:%s", modelstr, type, mac, attr, ep, value);
 		if (value != NULL) {
-			armpp_handle_msg((char *)modelstr, (char *)type, (char *)mac, (char *)attr, ep, (char *)value);
+			armpp_handle_msg((char *)from, (char *)modelstr, (char *)type, (char *)mac, (char *)attr, ep, (char *)value);
+		} else {
+			;
 		}
 	}
 	if (jpkt != NULL) {
@@ -405,4 +418,97 @@ DEF_UHANDLER(set_grp_device) {
 	return 0;
 }
 
+DEF_UHANDLER(z3_device_list) {
+	uproto_log_info(" ");
+
+	json_t *jlist = json_object_get(value, "device_list");
+	if (jlist == NULL) {
+		log_warn("Not Found device_list!");
+		return -1;
+	}
+
+	if (!json_is_array(jlist)) {
+		log_warn("device_list is not array!");
+		return -2;
+	}
+
+	size_t  i		= 0;
+	json_t *jv	= NULL;
+	json_array_foreach(jlist, i, jv) {
+		//mac": "00158d00026c5415", "type": "1203", "version": "1.0.13", "model": "0009", "battery": 100, "online": 0, "rssi": 100
+		const char *name			= json_get_string(jv, "mac");
+		const char *model			= json_get_string(jv, "model");
+		const char *type			= json_get_string(jv, "type");
+		const char *version		= json_get_string(jv, "version");
+		int battery = 100;		  json_get_int(jv, "battery", &battery);
+		int online	= 0;			  json_get_int(jv, "online", &online);
+		int rssi		= 100;		  json_get_int(jv, "rssi", &rssi);
+		const char *ModelStr	= json_get_string(jv, "ModelStr");
+
+		if (name == NULL || type == NULL || version == NULL || model == NULL) {
+			log_warn("NULL name/type/version/model!");
+			continue;
+		}
+
+		armpp_sync_add_device((char *)from, (char *)name, (char *)ModelStr, (char *)type);
+	}
+	return 0;
+}
+DEF_UHANDLER(z3_device_added) {
+	uproto_log_info(" ");
+
+	json_t *jv = value;
+	if (1) {
+		//mac": "00158d00026c5415", "type": "1203", "version": "1.0.13", "model": "0009", "battery": 100, "online": 0, "rssi": 100
+		const char *name			= json_get_string(jv, "mac");
+		const char *model			= json_get_string(jv, "model");
+		const char *type			= json_get_string(jv, "type");
+		const char *version		= json_get_string(jv, "version");
+		int battery = 100;			  json_get_int(jv, "battery", &battery);
+		int online	= 0;			  json_get_int(jv, "battery", &online);
+		int rssi		= 100;			  json_get_int(jv, "battery", &rssi);
+		const char *ModelStr	= json_get_string(jv, "ModelStr");
+
+		if (name == NULL || type == NULL || version == NULL || model == NULL) {
+			log_warn("NULL name/type/version/model!");
+			return -1;
+		}
+
+		armpp_sync_add_device((char *)from, (char *)name, (char *)ModelStr, (char *)type);
+	}
+	return 0;
+}
+DEF_UHANDLER(z3_device_deleted) {
+	uproto_log_info(" ");
+
+	json_t *jv = value;
+	if (1) {
+		//mac": "00158d00026c5415",
+		const char *name			= json_get_string(jv, "mac");
+		const char *type			= json_get_string(jv, "type");
+
+		name =name;
+		type =type;
+
+		if (name == NULL) {
+			log_warn("NULL name!");
+			return -1;
+		}
+		armpp_sync_del_device((char *)from, (char *)name);
+	}
+
+	return 0;
+}
+DEF_UHANDLER(zw_device_list) {
+	uproto_log_info(" ");
+	return z3_device_list(from, uuid, cmdmac, attr, value);
+}
+DEF_UHANDLER(zw_device_added) {
+	uproto_log_info(" ");
+	return z3_device_added(from, uuid, cmdmac, attr, value);
+}
+DEF_UHANDLER(zw_device_deleted) {
+	uproto_log_info(" ");
+	return z3_device_deleted(from, uuid, cmdmac, attr, value);
+}
 

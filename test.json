@@ -44,7 +44,8 @@
                         "modelstr" : "Mose",
                         "sence_idx" : 1,
                         "trig_idx" : 1,
-                        "type" : "1212"
+                        "type" : "1212",
+												"source" : "Zigbee"
                 },
                 {
                         "action_idx" : 1,
@@ -53,7 +54,8 @@
                         "modelstr" : "Mose",
                         "sence_idx" : 1,
                         "trig_idx" : 0,
-                        "type" : "1212"
+                        "type" : "1212",
+												"source": "Zigbee"
                 }
         ],
         "namemaps" : 
