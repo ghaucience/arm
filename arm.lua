@@ -170,7 +170,7 @@ function o.cfgvalue(self, section)
 end
 function o.write(self, section, value)
     io.stderr:write('device sence select\n')
-    arm_ubus_send('arm.eab_device',{mac = armjson.devices[section].mac, sence_idx = value})
+    arm_ubus_send('arm.grp_device',{mac = armjson.devices[section].mac, sence_idx = value})
 end
 
 return f

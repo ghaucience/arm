@@ -382,52 +382,140 @@ _uproto_handler_cmd(from, to, ctype, mac, dtime, id, command, cmdmac, attribute,
 /**> scan  */
 DEF_UHANDLER(set_add_sence) {
 	uproto_log_info(" ");
-	return 0;
+	
+	const char *name = json_get_string(value, "name");
+	if (name == NULL) {
+		return -1;
+	}
+	int init_enable =1; 
+	if (json_get_int(value, "enable", &init_enable) != 0) {
+		return -2;
+	}
+	
+	return armpp_add_sence((char *)name, init_enable);
 }
-DEF_UHANDLER(set_del_sence) {
+DEF_UHANDLER(set_del_sence) { 
 	uproto_log_info(" ");
-	return 0;
+
+	int idx =1; 
+	if (json_get_int(value, "idx", &idx) != 0) {
+		return -1;
+	}
+	
+	return armpp_del_sence(idx);
 }
 DEF_UHANDLER(set_lst_sence) {
 	uproto_log_info(" ");
+
+	json_t * ja = (json_t *)armpp_lst_sence();
+
+	/** TODO */
+	json_decref(ja);
+
 	return 0;
 }
-DEF_UHANDLER(set_eab_sence) {
+DEF_UHANDLER(set_eab_sence) { 
 	uproto_log_info(" ");
-	return 0;
+
+	int idx =1; 
+	if (json_get_int(value, "idx", &idx) != 0) {
+		return -1;
+	}
+	
+	return armpp_eab_sence(idx);
 }
-DEF_UHANDLER(set_dab_sence) {
+DEF_UHANDLER(set_dab_sence) {  
 	uproto_log_info(" ");
-	return 0;
+
+	int idx =1; 
+	if (json_get_int(value, "idx", &idx) != 0) {
+		return -1;
+	}
+	
+	return armpp_dab_sence(idx);
 }
 DEF_UHANDLER(set_clr_sence) {
 	uproto_log_info(" ");
-	return 0;
+
+	return armpp_clr_sence();
 }
+
+
+
 
 DEF_UHANDLER(set_lst_device) {
 	uproto_log_info(" ");
+
+	json_t *ja = (json_t*)armpp_lst_device();
+	
+	/** TODO */
+	json_decref(ja);
+
 	return 0;
 }
 DEF_UHANDLER(set_eab_device) {
 	uproto_log_info(" ");
-	return 0;
+
+	const char *mac = json_get_string(value, "mac");
+	if (mac == NULL) {
+		return -1;
+	}
+	
+	return armpp_eab_device((char *)mac);
 }
 DEF_UHANDLER(set_dab_device) {
 	uproto_log_info(" ");
-	return 0;
+
+	const char *mac = json_get_string(value, "mac");
+	if (mac == NULL) {
+		return -1;
+	}
+	
+	return armpp_dab_device((char *)mac);
 }
 DEF_UHANDLER(set_grp_device) {
 	uproto_log_info(" ");
-	return 0;
+
+	const char *mac = json_get_string(value, "mac");
+	if (mac == NULL) {
+		return -1;
+	}
+	int sence_idx  = -1;
+	if (json_get_int(value, "sence_idx", &sence_idx) != 0) {
+		return -2;
+	}
+	
+	return armpp_grp_device((char *)mac, sence_idx);
 }
 DEF_UHANDLER(set_trg_device) {
 	uproto_log_info(" ");
-	return 0;
+
+	const char *mac = json_get_string(value, "mac");
+	if (mac == NULL) {
+		uproto_log_warn("no mac");
+		return -1;
+	}
+	int trig_idx  = -1;
+	if (json_get_int(value, "trig_idx", &trig_idx) != 0) {
+		uproto_log_warn("no trig_ix");
+		return -2;
+	}
+	
+	return armpp_trg_device((char *)mac, trig_idx);
 }
 DEF_UHANDLER(set_act_device) {
 	uproto_log_info(" ");
-	return 0;
+
+	const char *mac = json_get_string(value, "mac");
+	if (mac == NULL) {
+		return -1;
+	}
+	int action_idx  = -1;
+	if (json_get_int(value, "action_idx", &action_idx) != 0) {
+		return -2;
+	}
+	
+	return armpp_act_device((char *)mac, action_idx);
 }
 
 DEF_UHANDLER(z3_device_list) {

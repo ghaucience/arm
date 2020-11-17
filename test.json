@@ -77,6 +77,11 @@
                         "enable" : 1,
                         "idx" : 1,
                         "name" : "KitchAlarm"
+                },
+                {
+                        "enable" : 1,
+                        "idx" : 2,
+                        "name" : "BedrooAlarm"
                 }
         ]
 }

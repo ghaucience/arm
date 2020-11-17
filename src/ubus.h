@@ -21,6 +21,7 @@
 typedef struct stUbus {
         struct ubus_context *ubus_ctx;
         struct ubus_event_handler listener;
+        struct ubus_event_handler listener_me;
         struct blob_buf b;
 
         pthread_mutex_t mutex;

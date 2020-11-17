@@ -27,9 +27,15 @@ static void ubus_receive_event(struct ubus_context *ctx,struct ubus_event_handle
 
 int ubus_init() {
 	ue.ubus_ctx = ubus_connect(NULL);
+
 	memset(&ue.listener, 0, sizeof(ue.listener));
 	ue.listener.cb = ubus_receive_event;
 	ubus_register_event_handler(ue.ubus_ctx, &ue.listener, LISTEN_PAT);//DS.BUL
+
+
+	memset(&ue.listener_me, 0, sizeof(ue.listener_me));
+	ue.listener_me.cb = ubus_receive_event;
+	ubus_register_event_handler(ue.ubus_ctx, &ue.listener_me, "DS.ARM");//DS.BUL
 
 	pthread_mutex_init(&ue.mutex, NULL);
 

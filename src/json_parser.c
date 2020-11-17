@@ -50,6 +50,14 @@ int json_get_int(const json_t *obj, const char *name, int *value)
 	json_int_t val;
 
 	if (json_get_integer(obj, name, &val) < 0) {
+		const char *s = json_get_string(obj, name);
+		if (s != NULL) {
+			int v = 0;
+			if (sscanf(s, "%d", &v) == 1) {
+				*value = v;
+				return 0;
+			}
+		}
 		return -1;
 	}
 	if (val < MIN_S32 || val > MAX_S32) {
