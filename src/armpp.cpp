@@ -366,7 +366,8 @@ int armpp_sync_del_device(char *from, char *mac) {
 		return 0;
 	}
 	
-	root["devices"][ix] = Json::Value();
+	//root["devices"][ix] = Json::Value();
+	root["devices"].removeIndex(ix, NULL);
 	armpp_write_file(root, root_file);
 	
 	return 0;
@@ -404,7 +405,7 @@ int armpp_del_sence(int idx) {
 
 	armpp_log_info("ix:%d", ix);
 	//root["sences"][ix] = Json::Value();
-	root["sences"].remove(ix);
+	root["sences"].removeIndex(ix, NULL);
 	armpp_write_file(root, root_file);
 
 	return 0;
@@ -469,11 +470,16 @@ int armpp_dab_sence(int idx) {
 int armpp_clr_sence() {
 	armpp_log_info(" ");
 
+#if 0
 	int size = root["sences"].size();
 	int i = 0;
 	for (i = 0; i < size; i++) {
-		root["sences"][i] = Json::Value();
+		//root["sences"][i] = Json::Value();
+		root["sences"].removeIndex(i, NULL);
 	}
+#else
+	root["sences"].clear();
+#endif
 
 	armpp_write_file(root, root_file);
 

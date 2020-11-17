@@ -29,6 +29,17 @@ function arm_ubus_send(attr, value)
         luci.util.exec('ubus send DS.ARM \'' .. jsc.stringify(cmd) .. '\'')
 end
 
+a = SimpleForm("Security Alarm", translate(""), translate(""))
+
+a.reset = false
+a.submit = false
+a.embedded = true
+
+-- !! Add Sence
+uu = a:section(SimpleSection, "Add Sence", translate(""));
+o = uu:option(DummyValue, "Add", translate(""))
+o.template = "admin_dusun/arm"
+
 --f = SimpleForm("Security Alarm", translate("Security Alarm"), translate("This page is for Security Setting"))
 f = SimpleForm("Security Alarm", translate(""), translate(""))
 f.reset = false
@@ -41,10 +52,6 @@ local armjson	= jsc.parse(armstr or '{}')
 -- !! luci.util.dumptable(armjson)
 
 
--- !! Add Sence
-uu = f:section(SimpleSection, "Add Sence", translate(""));
-o = uu:option(DummyValue, "Add", translate(""))
-o.template = "admin_dusun/arm"
 
 
 -- !! Security Sences
@@ -189,4 +196,4 @@ function o.write(self, section, value)
     armjson.devices[section].sence_idx = value
 end
 
-return f
+return a, f
