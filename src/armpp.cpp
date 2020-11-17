@@ -406,6 +406,16 @@ int armpp_del_sence(int idx) {
 	armpp_log_info("ix:%d", ix);
 	//root["sences"][ix] = Json::Value();
 	root["sences"].removeIndex(ix, NULL);
+	
+	ix = 0;
+	for (Json::Value::iterator it=root["devices"].begin(); it!=root["devices"].end(); ++it, ++ix) {
+		Json::Value d = *it;
+		if (d["sence_idx"].asInt() != idx) {
+			continue;
+		}
+		root["devices"][ix]["sence_idx"] = 0;
+	}
+
 	armpp_write_file(root, root_file);
 
 	return 0;

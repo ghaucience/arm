@@ -100,6 +100,13 @@ o.inputstyle = "remove"
 function o.write(self, section)
     io.stderr:write('sence deleted\n')
     arm_ubus_send('arm.del_sence',{idx = armjson.sences[section].idx})
+
+		for k,v in ipairs(armjson.devices) do
+			if (v.sence_idx == armjson.sences[section].idx) then                                                                                            
+				armjson.devices[k].sence_idx = 0                                                                                                        
+			end                                                                                                                                             
+    end
+
     armjson.sences[section] = nil
 end
 	
@@ -184,7 +191,7 @@ function o.write(self, section, value)
 end
 
 o = uu:option(ListValue, "sence_idx",	translate("Sence"))
-o.value("0")
+o:value("0")
 for k,v in ipairs(armjson.sences) do
 	o:value(v.idx);
 end
