@@ -200,8 +200,16 @@ function o.cfgvalue(self, section)
 end
 function o.write(self, section, value)
     io.stderr:write('device sence select\n')
-    arm_ubus_send('arm.grp_device',{mac = armjson.devices[section].mac, sence_idx = value})
-    armjson.devices[section].sence_idx = value
+		local find = 0
+		for k,v in ipairs(armjson.sences) do
+			if (v.idx == tonumber(value)) then
+				find = 1
+			end
+		end
+		if (find == 1) then
+			arm_ubus_send('arm.grp_device',{mac = armjson.devices[section].mac, sence_idx = value})
+			armjson.devices[section].sence_idx = value
+		end
 end
 
 return a, f
