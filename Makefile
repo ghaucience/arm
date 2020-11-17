@@ -85,6 +85,11 @@ clean:
 
 install: arm
 	cp ./build/arm ./files/usr/bin/ -rf
+	cp ./files ./files_install -rf
+	/home/au/all/gwork/openwrt/staging_dir/host/bin/luac -o ./files_install/usr/lib/lua/luci/controller/Dusun/arm.lua ./files/usr/lib/lua/luci/controller/Dusun/arm.lua
+	/home/au/all/gwork/openwrt/staging_dir/host/bin/luac -o ./files_install/usr/lib/lua/luci/model/cbi/admin_dusun/arm.lua ./files/usr/lib/lua/luci/model/cbi/admin_dusun/arm.lua
+	(rm -rf /tmp/files.tar.gz; cd ./files_install; tar zcvf /tmp/files.tar.gz .; cd -; rm -rf ./files_install)
+	
 
 scp:
 	scp -P2201 $(WORKDIR)/arm $(ROOTDIR)/files/etc/config/dusun/alarm/alarm.json root@192.168.0.230:/tmp
