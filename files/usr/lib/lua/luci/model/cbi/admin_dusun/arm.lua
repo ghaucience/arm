@@ -36,7 +36,7 @@ a.submit = false
 a.embedded = true
 
 -- !! Add Sence
-uu = a:section(SimpleSection, "Add Sence", translate(""));
+uu = a:section(SimpleSection, "Add Alarm", translate(""));
 o = uu:option(DummyValue, "Add", translate(""))
 o.template = "admin_dusun/arm"
 
