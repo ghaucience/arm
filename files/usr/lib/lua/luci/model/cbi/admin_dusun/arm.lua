@@ -184,6 +184,7 @@ function o.write(self, section, value)
 end
 
 o = uu:option(ListValue, "sence_idx",	translate("Sence"))
+o.value("0")
 for k,v in ipairs(armjson.sences) do
 	o:value(v.idx);
 end
