@@ -72,9 +72,11 @@ function o.write(self, section, value)
     if (value == '0') then
 	    io.stderr:write('disenable sence\n')
 	    arm_ubus_send('arm.dab_sence',{idx = armjson.sences[section].idx})
+	    armjson.sences[section].enable = value
     else
 	    io.stderr:write('enable sence\n')
 	    arm_ubus_send('arm.eab_sence',{idx = armjson.sences[section].idx})
+	    armjson.sences[section].enable = value
     end
 end
 
@@ -83,6 +85,7 @@ o.inputstyle = "remove"
 function o.write(self, section)
     io.stderr:write('sence deleted\n')
     arm_ubus_send('arm.del_sence',{idx = armjson.sences[section].idx})
+    armjson.sences[section] = nil
 end
 	
 -- !! Security Devices
@@ -124,6 +127,7 @@ end
 function o.write(self, section, value)
     io.stderr:write('trigger select\n')
     arm_ubus_send('arm.trg_device',{mac = armjson.devices[section].mac, trig_idx = value})
+    armjson.devices[section].trig_idx = value
 end
 
 
@@ -141,6 +145,7 @@ end
 function o.write(self, section, value)
     io.stderr:write('action select\n')
     arm_ubus_send('arm.act_device',{mac = armjson.devices[section].mac, action_idx = value})
+    armjson.devices[section].action_idx = value
 end
 
 o = uu:option(ListValue, "Denable",	translate("Enable/Disable"))
@@ -155,8 +160,10 @@ end
 function o.write(self, section, value)
     io.stderr:write('devices enable/disable\n')
     if (value == '0') then
+        armjson.devices[section].enable = value
     	arm_ubus_send('arm.dab_device',{mac = armjson.devices[section].mac})
     else
+        armjson.devices[section].enable = value
     	arm_ubus_send('arm.eab_device',{mac = armjson.devices[section].mac})
     end
 end
@@ -171,6 +178,7 @@ end
 function o.write(self, section, value)
     io.stderr:write('device sence select\n')
     arm_ubus_send('arm.grp_device',{mac = armjson.devices[section].mac, sence_idx = value})
+    armjson.devices[section].sence_idx = value
 end
 
 return f
