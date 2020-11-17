@@ -21,7 +21,7 @@ using namespace std;
 
 
 static Json::Value root;
-static string root_file = "/tmp/test.json";
+static string root_file = "/etc/config/dusun/alarm/alarm.json";
 static stSchduleTask_t qry_list_task;
 
 static int armpp_write_file(Json::Value &root, string file) {

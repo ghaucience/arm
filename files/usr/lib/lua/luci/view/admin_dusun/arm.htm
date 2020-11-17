@@ -1,0 +1,30 @@
+<%+cbi/valueheader%>
+
+<script type="text/javascript">//<![CDATA[
+	function add_sence(btn)
+	{
+		btn.disabled = true;
+		btn.value    = '<%:Adding ......%>';
+		var name = document.getElementById("sence_name").value;
+		XHR.get('<%=luci.dispatcher.build_url("admin", "dusun", "arm", "add_sence")%>',
+			'sence_name='+name,
+			function()
+			{
+				btn.disabled = false;
+				btn.value    = '<%:Add Sence%>';
+			}
+		);
+
+		return false;
+	}
+	
+//]]></script>
+
+<form>
+		<div class="layui-form-item">
+				<input type="button" class="cbi-button cbi-button-apply" value="<%:Add Sence%>" onclick="return add_sence(this)" />
+				<input class="cbi-input-user" type="text" id="sence_name" name="sence_name" value="SenceName" />
+		</div>
+</form>
+
+<%+cbi/valuefooter%>

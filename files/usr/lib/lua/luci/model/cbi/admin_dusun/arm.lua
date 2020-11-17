@@ -80,7 +80,7 @@ function o.write(self, section, value)
     end
 end
 
-o = uu:option(Button, 	  "Delete",	translate("Delete Scene"))
+o = uu:option(Button, 	  "Delete",	translate("Delete"))
 o.inputstyle = "remove"
 function o.write(self, section)
     io.stderr:write('sence deleted\n')
