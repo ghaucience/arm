@@ -569,6 +569,12 @@ int armpp_grp_device(char *mac, int sence_idx) {
 		armpp_log_warn("not exsit devcie:%s", mac);
 		return -1;
 	}
+	int iy;
+	Json::Value sence = armpp_get_group(sence_idx, iy);
+	if (sence.isNull()) {
+		armpp_log_warn("not exsit sence:%s", mac);
+		return -2;
+	}
 	if (!dev["sence_idx"].isNull() && dev["sence_idx"].asInt() == sence_idx) {
 		armpp_log_warn("device %s has in this group!", mac);
 		return 0;
