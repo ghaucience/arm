@@ -389,7 +389,7 @@ DEF_UHANDLER(set_add_sence) {
 	}
 	int init_enable =1; 
 	if (json_get_int(value, "enable", &init_enable) != 0) {
-		return -2;
+		init_enable = 0;
 	}
 	
 	return armpp_add_sence((char *)name, init_enable);

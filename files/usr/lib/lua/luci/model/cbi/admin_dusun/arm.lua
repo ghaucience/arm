@@ -33,7 +33,8 @@ end
 f = SimpleForm("Security Alarm", translate(""), translate(""))
 f.reset = false
 
-local armstr 	= fs.readfile("/tmp/test.json")
+--local armstr 	= fs.readfile("/tmp/test.json")
+local armstr 	= fs.readfile("/etc/config/dusun/alarm/alarm.json")
 local armjson	= jsc.parse(armstr or '{}')
 
 
