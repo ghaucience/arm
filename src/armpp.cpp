@@ -377,7 +377,7 @@ int armpp_add_sence(char *name, int init_enable) {
 	armpp_log_info(" %s, %d", name, init_enable);
 	int ix;
 	Json::Value sence = armpp_get_group_by_name(name, ix);
-	if (sence.isNull()) {
+	if (!sence.isNull()) {
 		armpp_log_warn("has exsit sence!");
 		return -1;
 	}
@@ -385,7 +385,7 @@ int armpp_add_sence(char *name, int init_enable) {
 	int idx		= armpp_generate_group_idx();
 	int asize	= root["sences"].size();
 
-	root["sences"][asize]["enable"] = !!init_enable;
+	root["sences"][asize]["enable"] = (int)!!init_enable;
 	root["sences"][asize]["idx"] = idx;
 	root["sences"][asize]["name"] = name;
 

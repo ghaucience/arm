@@ -7,7 +7,7 @@ end
 
 function action_arm_add_sence()                                                                              
         local jsc = require "luci.jsonc"                                                                  
-        name = 'aaa'                                                                                         
+        name = luci.http.formvalue("sence_name") or 'SenceName'
         cmd={                                                                                            
           PKT = {                                                                                         
             to = 'ARM',
@@ -28,5 +28,5 @@ function action_arm_add_sence()
         }                                                                                                       
        }                                                                                                 
        luci.util.exec('ubus send DS.ARM \'' .. jsc.stringify(cmd) .. '\'')                                
-       luci.http.redirect(luci.dispatcher.build_url("admin/dusun/arm"))                               
+       --luci.http.redirect(luci.dispatcher.build_url("admin/dusun/arm"))                               
 end  
