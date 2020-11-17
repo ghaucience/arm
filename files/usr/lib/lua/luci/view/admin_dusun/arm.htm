@@ -16,7 +16,8 @@
 		);
 
 		setTimeout(function () {
-			location.reload()
+			//location.reload()
+			window.location.href='<%=luci.dispatcher.build_url("admin", "dusun", "arm")%>'
 		}, 500);
 
 		return false;
