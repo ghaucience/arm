@@ -28,7 +28,6 @@ local armjson	= jsc.parse(armstr or '{}')
 --]]
 uu = f:section(Table, armjson.sences, "Security Alarm", translate(""))
 
-
 o = uu:option(DummyValue, "idx",	translate("Sence"))
 function o.cfgvalue(self, section)
     if (armjson.sences[section].idx == nil) then                                                               
@@ -48,16 +47,19 @@ function o.cfgvalue(self, section)
     end     
     return string.format("%d", armjson.sences[section].enable)
 end
+function o.write(self, section)
+    io.stderr:write('sence enable/disable\n')
+end
 
 o = uu:option(Button, 	  "Delete",	translate("Delete Scene"))
 o.inputstyle = "remove"
 function o.write(self, section)
 	--luci.util.exec('dusun_ucmd.sh remove '.. tlist.device_list[section].mac ..'')
 end
+function o.write(self, section)
+    io.stderr:write('sence deleted\n')
+end
 	
-o = uu:option(Button, 	  "Apply",	translate("Apply"))
-o.inputstyle = "apply"
-
 -- !! Security Devices
 --[[
                 {
@@ -94,6 +96,9 @@ function o.cfgvalue(self, section)
     end
     return string.format("%d", armjson.devices[section].trig_idx)
 end
+function o.write(self, section)
+    io.stderr:write('trigger select\n')
+end
 
 
 o = uu:option(ListValue, "action_idx",	translate("Actions"))
@@ -107,8 +112,11 @@ function o.cfgvalue(self, section)
     end
     return string.format("%d", armjson.devices[section].action_idx)
 end
+function o.write(self, section)
+    io.stderr:write('action select\n')
+end
 
-o = uu:option(ListValue, "enable",	translate("Enable/Disable"))
+o = uu:option(ListValue, "Denable",	translate("Enable/Disable"))
 o:value("0", translate("Disable"))
 o:value("1", translate("Enable"))
 function o.cfgvalue(self, section)
@@ -116,6 +124,9 @@ function o.cfgvalue(self, section)
             return '0'
     end     
     return string.format("%d", armjson.devices[section].enable)
+end
+function o.write(self, section)
+    io.stderr:write('devices enable/disable\n')
 end
 
 o = uu:option(ListValue, "sence_idx",	translate("Sence"))
@@ -125,9 +136,8 @@ end
 function o.cfgvalue(self, section)
     return string.format("%d", armjson.devices[section].sence_idx)
 end
-
-o = uu:option(Button, 	  "Apply",	translate("Apply"))
-o.inputstyle = "apply"
-
+function o.write(self, section)
+    io.stderr:write('device sence select\n')
+end
 
 return f
