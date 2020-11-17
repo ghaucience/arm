@@ -42,6 +42,8 @@ DEF_UHANDLER(set_lst_device);
 DEF_UHANDLER(set_eab_device);
 DEF_UHANDLER(set_dab_device);
 DEF_UHANDLER(set_grp_device);
+DEF_UHANDLER(set_trg_device);
+DEF_UHANDLER(set_act_device);
 
 DEF_UHANDLER(z3_device_list);
 DEF_UHANDLER(z3_device_added);
@@ -62,6 +64,8 @@ static stUHandler_t uhs[] = {
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.eab_device",						set_eab_device},
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.dab_device",						set_dab_device},
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.grp_device",						set_grp_device},
+	{"CLOUD",	"ARM",	"setAttribute",	"arm.trg_device",						set_trg_device},
+	{"CLOUD",	"ARM",	"setAttribute",	"arm.act_device",						set_act_device},
 
 	{"GREENPOWER", "CLOUD", "reportAttribute", "mod.device_list",			z3_device_list},
 	{"GREENPOWER", "CLOUD", "reportAttribute", "mod.new_device_added",	z3_device_added},
@@ -414,6 +418,14 @@ DEF_UHANDLER(set_dab_device) {
 	return 0;
 }
 DEF_UHANDLER(set_grp_device) {
+	uproto_log_info(" ");
+	return 0;
+}
+DEF_UHANDLER(set_trg_device) {
+	uproto_log_info(" ");
+	return 0;
+}
+DEF_UHANDLER(set_act_device) {
 	uproto_log_info(" ");
 	return 0;
 }

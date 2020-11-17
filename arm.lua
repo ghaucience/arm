@@ -8,6 +8,27 @@ local os  = require "os"
 local jsc = require "luci.jsonc"
 httpx =require("socket.http")
 
+function arm_ubus_send(attr, value)
+	cmd={                                                                                            
+        	PKT = {
+        		to = 'ARM',                                                                                  
+        		from =  "CLOUD",                                                                           
+        		type =  "cmd",                                                                                           
+        		data =  {                                                                                              
+                		id =  "xxxx",
+				command =  "setAttribute",
+                		arguments =  {       
+                        		mac =  "01020304050607",          
+                        		ep =  "0",
+                        		attribute =  attr,
+                        		value = value 
+				}
+                        }           
+                 }
+        }                              
+        luci.util.exec('ubus send DS.ARM \'' .. jsc.stringify(cmd) .. '\'')
+end
+
 --f = SimpleForm("Security Alarm", translate("Security Alarm"), translate("This page is for Security Setting"))
 f = SimpleForm("Security Alarm", translate(""), translate(""))
 f.reset = false
@@ -47,17 +68,21 @@ function o.cfgvalue(self, section)
     end     
     return string.format("%d", armjson.sences[section].enable)
 end
-function o.write(self, section)
-    io.stderr:write('sence enable/disable\n')
+function o.write(self, section, value)
+    if (value == '0') then
+	    io.stderr:write('disenable sence\n')
+	    arm_ubus_send('arm.dab_sence',{idx = armjson.sences[section].idx})
+    else
+	    io.stderr:write('enable sence\n')
+	    arm_ubus_send('arm.eab_sence',{idx = armjson.sences[section].idx})
+    end
 end
 
 o = uu:option(Button, 	  "Delete",	translate("Delete Scene"))
 o.inputstyle = "remove"
 function o.write(self, section)
-	--luci.util.exec('dusun_ucmd.sh remove '.. tlist.device_list[section].mac ..'')
-end
-function o.write(self, section)
     io.stderr:write('sence deleted\n')
+    arm_ubus_send('arm.del_sence',{idx = armjson.sences[section].idx})
 end
 	
 -- !! Security Devices
@@ -96,8 +121,9 @@ function o.cfgvalue(self, section)
     end
     return string.format("%d", armjson.devices[section].trig_idx)
 end
-function o.write(self, section)
+function o.write(self, section, value)
     io.stderr:write('trigger select\n')
+    arm_ubus_send('arm.trg_device',{mac = armjson.devices[section].mac, trig_idx = value})
 end
 
 
@@ -112,8 +138,9 @@ function o.cfgvalue(self, section)
     end
     return string.format("%d", armjson.devices[section].action_idx)
 end
-function o.write(self, section)
+function o.write(self, section, value)
     io.stderr:write('action select\n')
+    arm_ubus_send('arm.act_device',{mac = armjson.devices[section].mac, action_idx = value})
 end
 
 o = uu:option(ListValue, "Denable",	translate("Enable/Disable"))
@@ -125,8 +152,13 @@ function o.cfgvalue(self, section)
     end     
     return string.format("%d", armjson.devices[section].enable)
 end
-function o.write(self, section)
+function o.write(self, section, value)
     io.stderr:write('devices enable/disable\n')
+    if (value == '0') then
+    	arm_ubus_send('arm.dab_device',{mac = armjson.devices[section].mac})
+    else
+    	arm_ubus_send('arm.eab_device',{mac = armjson.devices[section].mac})
+    end
 end
 
 o = uu:option(ListValue, "sence_idx",	translate("Sence"))
@@ -136,8 +168,9 @@ end
 function o.cfgvalue(self, section)
     return string.format("%d", armjson.devices[section].sence_idx)
 end
-function o.write(self, section)
+function o.write(self, section, value)
     io.stderr:write('device sence select\n')
+    arm_ubus_send('arm.eab_device',{mac = armjson.devices[section].mac, sence_idx = value})
 end
 
 return f
