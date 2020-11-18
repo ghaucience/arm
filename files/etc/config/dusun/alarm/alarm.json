@@ -52,14 +52,14 @@
          "attr" : "device.zone_status",
          "idx" : 3,
          "name" : "NoLeak",
-         "value" : "0",
+         "value" : "1",
          "zone" : "leak"
       },
       {
          "attr" : "device.zone_status",
          "idx" : 4,
          "name" : "Leak",
-         "value" : "1",
+         "value" : "0",
          "zone" : "leak"
       }
    ],
@@ -91,7 +91,7 @@
          "modelstr" : "RoomBankLeakSensor",
          "sence_idx" : 1,
          "source" : "Zigbee",
-         "trig_idx" : 3,
+         "trig_idx" : 4,
          "type" : "1210"
       }
    ],
