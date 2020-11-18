@@ -202,7 +202,7 @@ int armpp_init() {
 }
 
 
-int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *attr, int ep, char *value) {
+int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *attr, int ep, char *value, char *zone) {
 	log_info("%s", __func__);
 
 	int ix = 0;
@@ -247,6 +247,12 @@ int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *at
 	if (cond["value"].asString().compare(value) != 0) {
 		log_warn("dev:%s not care attr value", mac);
 		return 0;
+	}
+	if (!cond["zone"].isNull()) {
+			if (zone == NULL || cond["zone"].asString().compare(zone) != 0) {
+				log_warn("dev:%s not care zone value", mac);
+				return 0;
+			}
 	}
 
 

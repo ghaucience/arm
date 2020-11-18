@@ -1,87 +1,117 @@
 {
-        "actions" : 
-        [
-                {
-                        "attr" : "device.onoff",
-                        "idx" : 1,
-                        "value" : {"value":0},
-												"name" : "Close"
-                },
-                {
-                        "attr" : "device.onoff",
-                        "idx" : 2,
-                        "value" : {"value":1},
-												"name" : "Open"
-                }
-        ],
-        "conds" : 
-        [
-                {
-                        "attr" : "device.meter.onoff",
-                        "idx" : 1,
-                        "value" : "0",
-												"name"	: "Close"
-                },
-                {
-                        "attr" : "device.meter.onoff",
-                        "idx" : 2,
-                        "value" : "1",
-												"name"	: "Open"
-                },
-                {
-                        "attr" : "device.zone_status",
-                        "idx" : 3,
-                        "value" : "1",
-												"name"	: "Motion"
-                }
-        ],
-        "devices" : 
-        [
-                {
-                        "action_idx" : 0,
-                        "enable" : 1,
-                        "mac" : "ec1bbdfffe8b1450",
-                        "modelstr" : "Mose",
-                        "sence_idx" : 1,
-                        "trig_idx" : 1,
-                        "type" : "1212",
-												"source" : "Zigbee"
-                },
-                {
-                        "action_idx" : 1,
-                        "enable" : 1,
-                        "mac" : "000d6f000be63f63",
-                        "modelstr" : "Mose",
-                        "sence_idx" : 1,
-                        "trig_idx" : 0,
-                        "type" : "1212",
-												"source": "Zigbee"
-                }
-        ],
-        "namemaps" : 
-        [
-                {
-                        "modelstr" : "SmartPlug",
-                        "type" : "1212",
-                        "name" : "Motion Sensor"
-                },
-                {
-                        "modelstr" : "SmartOutlet",
-                        "type" : "1212",
-                        "name" : "Motion Sensor"
-                }
-        ],
-        "sences" : 
-        [
-                {
-                        "enable" : 1,
-                        "idx" : 1,
-                        "name" : "KitchAlarm"
-                },
-                {
-                        "enable" : 1,
-                        "idx" : 2,
-                        "name" : "BedrooAlarm"
-                }
-        ]
+   "actions" : [
+      {
+         "attr" : "device.onoff",
+         "idx" : 1,
+         "name" : "On",
+         "value" : {
+            "value" : 1
+         }
+      },
+      {
+         "attr" : "device.onoff",
+         "idx" : 2,
+         "name" : "Off",
+         "value" : {
+            "value" : 0
+         }
+      },
+      {
+         "attr" : "device.voicelight.alarm",
+         "idx" : 3,
+         "name" : "OpenAlarm",
+         "value" : {
+            "value" : 1
+         }
+      },
+      {
+         "attr" : "device.voicelight.alarm",
+         "idx" : 4,
+         "name" : "CloseAlarm",
+         "value" : {
+            "value" : 0
+         }
+      }
+   ],
+   "conds" : [
+      {
+         "attr" : "device.zone_status",
+         "idx" : 1,
+         "name" : "Motion",
+         "value" : "1",
+         "zone" : "pir"
+      },
+      {
+         "attr" : "device.zone_status",
+         "idx" : 2,
+         "name" : "NonMotion",
+         "value" : "0",
+         "zone" : "pir"
+      },
+      {
+         "attr" : "device.zone_status",
+         "idx" : 3,
+         "name" : "NoLeak",
+         "value" : "0",
+         "zone" : "leak"
+      },
+      {
+         "attr" : "device.zone_status",
+         "idx" : 4,
+         "name" : "Leak",
+         "value" : "1",
+         "zone" : "leak"
+      }
+   ],
+   "devices" : [
+      {
+         "action_idx" : 0,
+         "enable" : 0,
+         "mac" : "ec1bbdfffe8b1450",
+         "modelstr" : "SmartOutlet",
+         "sence_idx" : 1,
+         "source" : "Zigbee",
+         "trig_idx" : 0,
+         "type" : "1218"
+      },
+      {
+         "action_idx" : 1,
+         "enable" : 1,
+         "mac" : "000d6f000be63f63",
+         "modelstr" : "SmartPlug",
+         "sence_idx" : 1,
+         "source" : "Zigbee",
+         "trig_idx" : 0,
+         "type" : "1218"
+      },
+      {
+         "action_idx" : 0,
+         "enable" : 1,
+         "mac" : "842e14fffe1e9c39",
+         "modelstr" : "RoomBankLeakSensor",
+         "sence_idx" : 1,
+         "source" : "Zigbee",
+         "trig_idx" : 3,
+         "type" : "1210"
+      }
+   ],
+   "namemaps" : [
+      {
+         "modelstr" : "SmartPlug",
+         "name" : "Motion Sensor",
+         "type" : "1212"
+      },
+      {
+         "modelstr" : "SmartOutlet",
+         "name" : "Motion Sensor",
+         "type" : "1212"
+      }
+   ],
+   "sences" : [
+      {
+         "enable" : 1,
+         "idx" : 1,
+         "name" : "KitchAlarm"
+      }
+   ]
 }

@@ -250,6 +250,7 @@ int uproto_handler_ubus_event_general(const char *msg) {
 		const char *attr		 = attribute;
 		int		ep = -1;   json_get_int(jval, "ep", &ep);
 		const char *value		 = json_get_string(jval, "value");
+		const char *zone		 = json_get_string(jval, "zone");
 		if (value == NULL) {
 			int ival = -1;
 			if (json_get_int(jval, "value", &ival) == 0) {
@@ -260,7 +261,7 @@ int uproto_handler_ubus_event_general(const char *msg) {
 		}
 		uproto_log_info("modelstr:%s, type:%s, mac:%s, attr:%s, ep:%d, value:%s", modelstr, type, mac, attr, ep, value);
 		if (value != NULL) {
-			armpp_handle_msg((char *)from, (char *)modelstr, (char *)type, (char *)mac, (char *)attr, ep, (char *)value);
+			armpp_handle_msg((char *)from, (char *)modelstr, (char *)type, (char *)mac, (char *)attr, ep, (char *)value, (char *)zone);
 		} else {
 			;
 		}
