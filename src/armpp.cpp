@@ -24,6 +24,10 @@ static Json::Value root;
 static string root_file = "/etc/config/dusun/alarm/alarm.json";
 static stSchduleTask_t qry_list_task;
 
+
+/**
+ * Init Read  /  Write
+ * ============================================================================= */
 static int armpp_write_file(Json::Value &root, string file) {
 #if 1
 	Json::StyledWriter sw;
@@ -78,6 +82,9 @@ static int armpp_make_test_json() {
 	return 0;
 }
 
+/**
+ * Actrue Devices
+ * ============================================================================= */
 static int armpp_generate_device_idx() {
 	int asize		= root["devices"].size();
 
@@ -111,6 +118,48 @@ static Json::Value armpp_get_device(string mac, int &ix) {
 	}
 	return Json::Value();
 }
+
+/**
+ * Actrue Devices
+ * ============================================================================= */
+static int armpp_generate_vdevice_idx() {
+	int asize		= root["sendevs"].size();
+
+	for (int i  = 1 ; i <= asize; i++) {
+		int find = 0;
+
+		for (Json::Value::iterator it=root["sendevs"].begin(); it!=root["sendevs"].end(); ++it) {
+			Json::Value d = *it;
+			if (d["idx"].asInt() == i) {
+				find = 1;
+				break;
+			}
+		}
+		if (find == 1) {
+			continue;
+		}
+		return i;
+	}
+
+	return asize + 1;
+}
+static Json::Value armpp_get_vdevice(int idx, int &ix) {
+	ix = 0;
+	for (Json::Value::iterator it=root["sendevs"].begin(); it!=root["sendevs"].end(); ++it) {
+		Json::Value d = *it;
+		if (d["idx"].asInt() != idx) {
+			ix++;
+			continue;
+		}
+		return d;
+	}
+	return Json::Value();
+}
+
+
+/**
+ * Sences
+ * ============================================================================= */
 static Json::Value armpp_get_group(int idx, int &ix) {
 	ix = 0;
 	for (Json::Value::iterator it=root["sences"].begin(); it!=root["sences"].end(); ++it) {
@@ -123,6 +172,7 @@ static Json::Value armpp_get_group(int idx, int &ix) {
 	}	
 	return Json::Value();
 }
+
 static Json::Value armpp_get_group_by_name(char *name, int &ix) {
 	ix = 0;
 	for (Json::Value::iterator it=root["sences"].begin(); it!=root["sences"].end(); ++it) {
@@ -158,6 +208,9 @@ static int armpp_generate_group_idx() {
 	return asize + 1;
 }
 
+/**
+ * Conditions
+ * ============================================================================= */
 static Json::Value armpp_get_dev_cond(int trig_idx, int &ix) {
 	ix = 0;
 	for (Json::Value::iterator it=root["conds"].begin(); it!=root["conds"].end(); ++it) {
@@ -170,6 +223,10 @@ static Json::Value armpp_get_dev_cond(int trig_idx, int &ix) {
 	}
 	return Json::Value();
 }
+
+/**
+ * Actions
+ * ============================================================================= */
 static Json::Value armpp_get_dev_action(int action_idx, int &ix) {
 	ix = 0;
 	for (Json::Value::iterator it=root["actions"].begin(); it!=root["actions"].end(); ++it) {
@@ -184,11 +241,14 @@ static Json::Value armpp_get_dev_action(int action_idx, int &ix) {
 }
 
 
-static void *qry_list_func(void *arg) {
+
+/**
+ * Body &  Api
+ * ============================================================================= */
+static void qry_list_func(void *arg) {
 	system("dusun_ucmd.sh list");
 	schedue_add(&qry_list_task, 1000*60*10, (void*)qry_list_func, 0);
 }
-
 int armpp_init() {
 	int ret = armpp_read_file(root, root_file);
 	if (ret != 0) {
@@ -202,9 +262,11 @@ int armpp_init() {
 }
 
 
+
 int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *attr, int ep, char *value, char *zone) {
 	log_info("%s", __func__);
 
+#if 0
 	int ix = 0;
 	Json::Value dev = armpp_get_device(mac, ix);
 	if (dev.isNull()) {
@@ -309,9 +371,126 @@ int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *at
 			jvalue,
 			0,
 			uuid);
+#else
+	int ix = 0;
+	map<int,int> exe_stack;
+	for (Json::Value::iterator it=root["sendevs"].begin(); it!=root["sendevs"].end(); ++it) {
+		Json::Value dev = *it;
+		if (dev.isNull()) {
+			log_warn("dev:%s not exsit", mac);
+			continue;
+		}
+
+		if (dev["enable"].asInt() <= 0) {
+			log_warn("dev:%s disabeld", mac);
+			continue;
+		}
+
+		if (dev["sence_idx"].asInt() <= 0) {
+			log_warn("dev:%s no sence", mac);
+			continue;
+		}
+
+		Json::Value sence = armpp_get_group(dev["sence_idx"].asInt(), ix);
+		if (sence.isNull()) {
+			log_warn("dev:%s no sence", mac);
+			continue;
+		}
+		if (sence["enable"].asInt() <= 0) {
+			log_warn("dev:%s sence disabled", mac);
+			continue;
+		}
+
+
+		Json::Value cond = armpp_get_dev_cond(dev["trig_idx"].asInt(), ix);
+		if (cond.isNull()) {
+			log_warn("dev:%s cond null", mac);
+			continue;
+		}
+
+		if (cond["attr"].asString().compare(attr) != 0) {
+			log_warn("dev:%s not care attr", mac);
+			continue;
+		}
+
+		if (cond["value"].asString().compare(value) != 0) {
+			log_warn("dev:%s not care attr value", mac);
+			continue;
+		}
+		if (!cond["zone"].isNull()) {
+			if (zone == NULL || cond["zone"].asString().compare(zone) != 0) {
+				log_warn("dev:%s not care zone value", mac);
+				continue;
+			}
+		}
+
+		if (exe_stack.find(dev["sence_idx"].asInt()) != exe_stack.end()) {
+			log_debug("Ignore Executed Sence_idx:%d", dev["sence_idx"].asInt());
+			continue;
+		}
+		exe_stack[dev["sence_idx"].asInt()] = 1;
+
+		for (Json::Value::iterator it=root["sendevs"].begin(); it!=root["sendevs"].end(); ++it) {
+			Json::Value d = *it;
+			if (d["enable"].asInt() <= 0) {
+				continue;
+			}
+			if (d["sence_idx"].asInt() != sence["idx"].asInt()) {
+				continue;
+			}
+			if (d["action_idx"].asInt() <= 0) {
+				continue;
+			}
+
+			Json::Value action = armpp_get_dev_action(d["action_idx"].asInt(), ix);
+			Json::FastWriter wr;
+			//log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), action["value"].toStyledString().c_str(), d["mac"].asString().c_str());
+			log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), wr.write(action["value"]).c_str(), d["mac"].asString().c_str());
+
+			char uuid[64];
+			sprintf(uuid, "%d", rand()%1000000);
+
+			json_error_t error;
+			json_t *jvalue = json_loads(wr.write(action["value"]).c_str(), 0, &error);
+			if (jvalue == NULL) {
+				log_warn("error action value");
+				continue;
+			}
+
+			uproto_call("CLOUD", "GREENPOWER",
+					d["mac"].asString().c_str(), 
+					action["attr"].asString().c_str(), 
+					"setAttribute",
+					jvalue,
+					0,
+					uuid);
+		}
+
+		char uuid[64];
+		sprintf(uuid, "%d", rand()%1000000);
+
+		json_error_t error;
+		Json::FastWriter wr;
+		json_t *jvalue = json_loads(wr.write(sence).c_str(), 0, &error);
+		if (jvalue == NULL) {
+			return 0;
+		}
+		char gwmac[32];
+		system_get_mac(gwmac, sizeof(gwmac));
+		uproto_call("ARM", "GATEWAY",
+				gwmac,
+				"arm.sence.triggered", 
+				"reportAttribute",
+				jvalue,
+				0,
+				uuid);
+	}
+#endif
 	return 0;
 }
 
+
+/**> Devies Api */
 int armpp_sync_add_device(char *from, char *mac, char *modelstr,  char *type) {
 	armpp_log_info(" ");
 
@@ -380,6 +559,7 @@ int armpp_sync_del_device(char *from, char *mac) {
 }
 
 
+/**> Sence Api */
 int armpp_add_sence(char *name, int init_enable) {
 	armpp_log_info(" %s, %d", name, init_enable);
 	int ix;
@@ -503,7 +683,7 @@ int armpp_clr_sence() {
 }
 
 
-
+/**> acture device api */
 int armpp_lst_device() {
 	armpp_log_info(" ");
 
@@ -577,7 +757,7 @@ int armpp_grp_device(char *mac, int sence_idx) {
 	}
 	int iy;
 	Json::Value sence = armpp_get_group(sence_idx, iy);
-	if (sence.isNull()) {
+	if (sence.isNull() && sence_idx != 0) {
 		armpp_log_warn("not exsit sence:%s", mac);
 		return -2;
 	}
@@ -625,6 +805,172 @@ int armpp_act_device(char *mac, int action_idx) {
 		return 0;
 	}
 	root["devices"][ix]["action_idx"] = action_idx;
+
+	armpp_write_file(root, root_file);
+
+	return 0;
+}
+
+
+/**> vitual device api */
+int armpp_lst_vdevice() {
+	armpp_log_info(" ");
+
+	json_t *ja = json_array();
+
+	for (Json::Value::iterator it=root["sendevs"].begin(); it!=root["sendevs"].end(); ++it) {
+		Json::Value s = *it;
+		
+		json_t *ji = json_object();
+		json_object_set_new(ji, "mac",				json_string(s["mac"].asString().c_str()));
+		json_object_set_new(ji, "modelstr",		json_string(s["modelstr"].asString().c_str()));
+		json_object_set_new(ji, "type",				json_string(s["type"].asString().c_str()));
+		json_object_set_new(ji, "source",			json_string(s["source"].asString().c_str()));
+		
+		json_object_set_new(ji, "enable",			json_integer(s["enable"].asInt()));
+		json_object_set_new(ji, "action_idx", json_integer(s["action_idx"].asInt()));
+		json_object_set_new(ji, "trig_idx",		json_integer(s["trig_idx"].asInt()));
+		json_object_set_new(ji, "sence_idx",	json_integer(s["sence_idx"].asInt()));
+		json_object_set_new(ji, "idx",				json_integer(s["idx"].asInt()));
+
+		json_array_append_new(ja, ji);
+	}	
+
+	return (int)ja;
+}
+
+int armpp_add_vdevcie(char *mac) {
+	armpp_log_info(" %s", mac);
+
+	int ix;
+	Json::Value dev = armpp_get_device(mac, ix);
+	if (dev.isNull()) {
+		armpp_log_warn("not exsit devcie:%s", mac);
+		return -1;
+	}
+
+	ix = armpp_generate_vdevice_idx();
+	int asize = root["sendevs"].size();
+	root["sendevs"][asize] = dev;
+	root["sendevs"][asize]["idx"] = ix;
+
+	armpp_write_file(root, root_file);
+	
+	return 0;
+}
+
+int armpp_del_vdevice(int idx) {
+	armpp_log_info(" %d", idx);
+
+	int ix;
+	Json::Value dev = armpp_get_vdevice(idx, ix);
+	if (dev.isNull()) {
+		armpp_log_warn("not exsit devcie:%d", idx);
+		return -1;
+	}
+
+	root["sendevs"].removeIndex(ix, NULL);
+
+	armpp_write_file(root, root_file);
+	return 0;
+}
+int armpp_eab_vdevice(int idx) {
+	armpp_log_info(" %d", idx);
+
+	int ix;
+	Json::Value dev = armpp_get_vdevice(idx, ix);
+	if (dev.isNull()) {
+		armpp_log_warn("not exsit devcie:%d", idx);
+		return -1;
+	}
+	if (!dev["enable"].isNull() && dev["enable"].asInt() == 1) {
+		armpp_log_warn("device %s has enabled!", dev["mac"].asString().c_str());
+		return 0;
+	}
+	root["sendevs"][ix]["enable"] = 1;
+
+	armpp_write_file(root, root_file);
+
+	return 0;
+}
+int armpp_dab_vdevice(int idx) {
+	armpp_log_info(" %d", idx);
+
+	int ix;
+	Json::Value dev = armpp_get_vdevice(idx, ix);
+	if (dev.isNull()) {
+		armpp_log_warn("not exsit devcie:%d", idx);
+		return -1;
+	}
+	if (!dev["enable"].isNull() && dev["enable"].asInt() == 0) {
+		armpp_log_warn("device %s has disabled!", dev["mac"].asString().c_str());
+		return 0;
+	}
+	root["sendevs"][ix]["enable"] = 0;
+
+	armpp_write_file(root, root_file);
+
+	return 0;
+}
+int armpp_grp_vdevice(int idx, int sence_idx) {
+	armpp_log_info(" %d %d",idx, sence_idx);
+
+	int ix;
+	Json::Value dev = armpp_get_vdevice(idx, ix);
+	if (dev.isNull()) {
+		armpp_log_warn("not exsit devcie:%d", idx);
+		return -1;
+	}
+	int iy;
+	Json::Value sence = armpp_get_group(sence_idx, iy);
+	if (sence.isNull()  && sence_idx != 0) {
+		armpp_log_warn("not exsit sence:%s", dev["mac"].asString().c_str());
+		return -2;
+	}
+	if (!dev["sence_idx"].isNull() && dev["sence_idx"].asInt() == sence_idx) {
+		armpp_log_warn("device %s has in this group!", dev["mac"].asString().c_str());
+		return 0;
+	}
+	root["sendevs"][ix]["sence_idx"] = sence_idx;
+
+	armpp_write_file(root, root_file);
+
+	return 0;
+
+}
+int armpp_trg_vdevice(int idx, int trig_idx) {
+	armpp_log_info(" %d %d", idx, trig_idx);
+
+	int ix;
+	Json::Value dev = armpp_get_vdevice(idx, ix);
+	if (dev.isNull()) {
+		armpp_log_warn("not exsit devcie:%d", idx);
+		return -1;
+	}
+	if (!dev["trig_idx"].isNull() && dev["trig_idx"].asInt() == trig_idx) {
+		armpp_log_warn("device %s has in this trig_idx!", dev["mac"].asString().c_str());
+		return 0;
+	}
+	root["sendevs"][ix]["trig_idx"] = trig_idx;
+
+	armpp_write_file(root, root_file);
+
+	return 0;
+}
+int armpp_act_vdevice(int idx, int action_idx) {
+	armpp_log_info(" %d %d", idx, action_idx);
+
+	int ix;
+	Json::Value dev = armpp_get_vdevice(idx, ix);
+	if (dev.isNull()) {
+		armpp_log_warn("not exsit devcie:%d", idx);
+		return -1;
+	}
+	if (!dev["action_idx"].isNull() && dev["action_idx"].asInt() == action_idx) {
+		armpp_log_warn("device %s has in this act_idx!", dev["mac"].asString().c_str());
+		return 0;
+	}
+	root["sendevs"][ix]["action_idx"] = action_idx;
 
 	armpp_write_file(root, root_file);
 

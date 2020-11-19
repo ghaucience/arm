@@ -36,6 +36,7 @@ a.submit = false
 a.embedded = true
 
 -- !! Add Sence
+-- ------------------------------------------------------------------------------------------
 uu = a:section(SimpleSection, "Add Alarm", translate(""));
 o = uu:option(DummyValue, "Add", translate(""))
 o.template = "admin_dusun/arm"
@@ -55,6 +56,7 @@ local armjson	= jsc.parse(armstr or '{}')
 
 
 -- !! Security Sences
+-- ------------------------------------------------------------------------------------------
 --[[
                 {
                         "enable" : 1,
@@ -101,9 +103,9 @@ function o.write(self, section)
     io.stderr:write('sence deleted\n')
     arm_ubus_send('arm.del_sence',{idx = armjson.sences[section].idx})
 
-		for k,v in ipairs(armjson.devices) do
+		for k,v in ipairs(armjson.sendevs) do
 			if (v.sence_idx == armjson.sences[section].idx) then                                                                                            
-				armjson.devices[k].sence_idx = 0                                                                                                        
+				armjson.sendevs[k].sence_idx = 0                                                                                                        
 			end                                                                                                                                             
     end
 
@@ -111,6 +113,7 @@ function o.write(self, section)
 end
 	
 -- !! Security Devices
+-- ------------------------------------------------------------------------------------------
 --[[
                 {
                         "action_idx" : 0,
@@ -122,7 +125,123 @@ end
                         "type" : "1212"
                 },
 --]]
-uu = f:section(Table, armjson.devices, "Devices", translate(""))
+uu = f:section(Table, armjson.sendevs, "Sence Devices", translate(""))
+o = uu:option(DummyValue, "xidx",	translate("Idx"))
+function o.cfgvalue(self, section)
+    return string.format("%s", armjson.sendevs[section].idx)
+end
+
+o = uu:option(DummyValue, "modelstr",	translate("Name"))
+
+o = uu:option(DummyValue, "source",	translate("Wireless"))
+function o.cfgvalue(self, section)
+    if (armjson.sendevs[section].source == nil) then                                                               
+            return 'Zigbee'
+    end     
+    return string.format("%s", armjson.sendevs[section].source)
+end
+
+o = uu:option(DummyValue, "mac",	translate("Mac address"))
+
+o = uu:option(ListValue, "trig_idx",	translate("Triggering conditions"))
+o:value("0", "None");
+for k,v in ipairs(armjson.conds) do
+    o:value(string.format("%d", v.idx), translate(v.name));
+end
+function o.cfgvalue(self, section)
+    if (armjson.sendevs[section].trig_idx == nil) then                                                               
+	return '0'
+    end
+    return string.format("%d", armjson.sendevs[section].trig_idx)
+end
+function o.write(self, section, value)
+    io.stderr:write('trigger select\n')
+    arm_ubus_send('arm.trg_vdevice',{idx = armjson.sendevs[section].idx, trig_idx = value})
+    armjson.sendevs[section].trig_idx = value
+end
+
+
+o = uu:option(ListValue, "action_idx",	translate("Actions"))
+o:value("0", "None");
+for k,v in ipairs(armjson.actions) do
+    o:value(string.format("%d", v.idx), translate(v.name));
+end
+function o.cfgvalue(self, section)
+    if (armjson.sendevs[section].action_idx == nil) then                                                               
+	return '0'
+    end
+    return string.format("%d", armjson.sendevs[section].action_idx)
+end
+function o.write(self, section, value)
+    io.stderr:write('action select\n')
+    arm_ubus_send('arm.act_vdevice',{idx = armjson.sendevs[section].idx, action_idx = value})
+    armjson.sendevs[section].action_idx = value
+end
+
+o = uu:option(ListValue, "Denable",	translate("Enable/Disable"))
+o:value("0", translate("Disable"))
+o:value("1", translate("Enable"))
+function o.cfgvalue(self, section)
+    if (armjson.sendevs[section].enable == nil) then                                                               
+            return '0'
+    end     
+    return string.format("%d", armjson.sendevs[section].enable)
+end
+function o.write(self, section, value)
+    io.stderr:write('sendevs enable/disable\n')
+    if (value == '0') then
+        armjson.sendevs[section].enable = value
+    	arm_ubus_send('arm.dab_vdevice',{idx = armjson.sendevs[section].idx})
+    else
+        armjson.sendevs[section].enable = value
+    	arm_ubus_send('arm.eab_vdevice',{idx = armjson.sendevs[section].idx})
+    end
+end
+
+o = uu:option(ListValue, "sence_idx",	translate("Sence"))
+o:value("0")
+for k,v in ipairs(armjson.sences) do
+	o:value(v.idx);
+end
+function o.cfgvalue(self, section)
+    return string.format("%d", armjson.sendevs[section].sence_idx)
+end
+function o.write(self, section, value)
+    io.stderr:write('device sence select\n')
+		local find = 0
+		for k,v in ipairs(armjson.sences) do
+			if (v.idx == tonumber(value)) then
+				find = 1
+			end
+		end
+		if (find == 1 or value == '0') then
+			arm_ubus_send('arm.grp_vdevice',{idx = armjson.sendevs[section].idx, sence_idx = value})
+			armjson.sendevs[section].sence_idx = value
+		end
+end
+
+o = uu:option(Button, "XDelete",	translate("Delete"))
+function o.write(self, section, value)
+			arm_ubus_send('arm.del_vdevice',{idx = armjson.sendevs[section].idx})
+			armjson.sendevs[section] = nil
+end
+
+--[[
+--]]
+-- !! Actrue Devices
+-- ------------------------------------------------------------------------------------------
+--[[
+                {
+                        "action_idx" : 0,
+                        "enable" : 1,
+                        "mac" : "ec1bbdfffe8b1450",
+                        "modelstr" : "Mose",
+                        "sence_idx" : 1,
+                        "trig_idx" : 1,
+                        "type" : "1212"
+                },
+--]]
+uu = f:section(Table, armjson.devices, "Sence Devices", translate(""))
 o = uu:option(DummyValue, "modelstr",	translate("Name"))
 
 o = uu:option(DummyValue, "source",	translate("Wireless"))
@@ -135,14 +254,14 @@ end
 
 o = uu:option(DummyValue, "mac",	translate("Mac address"))
 
-o = uu:option(ListValue, "trig_idx",	translate("Triggering conditions"))
+o = uu:option(ListValue, "a_trig_idx",	translate("Triggering conditions"))
 o:value("0", "None");
 for k,v in ipairs(armjson.conds) do
     o:value(string.format("%d", v.idx), translate(v.name));
 end
 function o.cfgvalue(self, section)
     if (armjson.devices[section].trig_idx == nil) then                                                               
-	return '0'
+			return '0'
     end
     return string.format("%d", armjson.devices[section].trig_idx)
 end
@@ -153,7 +272,7 @@ function o.write(self, section, value)
 end
 
 
-o = uu:option(ListValue, "action_idx",	translate("Actions"))
+o = uu:option(ListValue, "a_ction_idx",	translate("Actions"))
 o:value("0", "None");
 for k,v in ipairs(armjson.actions) do
     o:value(string.format("%d", v.idx), translate(v.name));
@@ -170,7 +289,7 @@ function o.write(self, section, value)
     armjson.devices[section].action_idx = value
 end
 
-o = uu:option(ListValue, "Denable",	translate("Enable/Disable"))
+o = uu:option(ListValue, "a_Denable",	translate("Enable/Disable"))
 o:value("0", translate("Disable"))
 o:value("1", translate("Enable"))
 function o.cfgvalue(self, section)
@@ -190,7 +309,7 @@ function o.write(self, section, value)
     end
 end
 
-o = uu:option(ListValue, "sence_idx",	translate("Sence"))
+o = uu:option(ListValue, "a_sence_idx",	translate("Sence"))
 o:value("0")
 for k,v in ipairs(armjson.sences) do
 	o:value(v.idx);
@@ -206,10 +325,34 @@ function o.write(self, section, value)
 				find = 1
 			end
 		end
-		if (find == 1) then
+		if (find == 1 or value == '0') then
 			arm_ubus_send('arm.grp_device',{mac = armjson.devices[section].mac, sence_idx = value})
 			armjson.devices[section].sence_idx = value
 		end
 end
+
+o = uu:option(Button, "Create",	translate("Create Sence Device"))
+function o.write(self, section, value)
+			asize = #armjson.sendevs
+			local ix = 1
+			for i=1,asize+1 do
+				local find = 0
+				for k,v in ipairs(armjson.sendevs) do
+					if (armjson.sendevs[k].idx == i) then
+						find = 1
+						break
+					end
+				end
+				if (find ~= 1) then
+					ix = i
+					break
+				end
+			end
+			armjson.sendevs[asize+1] = armjson.devices[section]
+			armjson.sendevs[asize+1].idx = ix
+			arm_ubus_send('arm.add_vdevice',{mac = armjson.devices[section].mac})
+end
+--[[
+--]]
 
 return a, f

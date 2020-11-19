@@ -38,6 +38,16 @@ DEF_UHANDLER(set_eab_sence);
 DEF_UHANDLER(set_dab_sence);
 DEF_UHANDLER(set_clr_sence);
 
+
+DEF_UHANDLER(set_add_vdevice);
+DEF_UHANDLER(set_del_vdevice);
+DEF_UHANDLER(set_lst_vdevice);
+DEF_UHANDLER(set_eab_vdevice);
+DEF_UHANDLER(set_dab_vdevice);
+DEF_UHANDLER(set_grp_vdevice);
+DEF_UHANDLER(set_trg_vdevice);
+DEF_UHANDLER(set_act_vdevice);
+
 DEF_UHANDLER(set_lst_device);
 DEF_UHANDLER(set_eab_device);
 DEF_UHANDLER(set_dab_device);
@@ -59,6 +69,15 @@ static stUHandler_t uhs[] = {
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.eab_sence",						set_eab_sence},
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.dab_sence",						set_dab_sence},
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.clr_sence",						set_clr_sence},
+
+	{"CLOUD",	"ARM",	"setAttribute",	"arm.add_vdevice",					set_add_vdevice},
+	{"CLOUD",	"ARM",	"setAttribute",	"arm.del_vdevice",					set_del_vdevice},
+	{"CLOUD",	"ARM",	"setAttribute",	"arm.lst_vdevice",					set_lst_vdevice},
+	{"CLOUD",	"ARM",	"setAttribute",	"arm.eab_vdevice",					set_eab_vdevice},
+	{"CLOUD",	"ARM",	"setAttribute",	"arm.dab_vdevice",					set_dab_vdevice},
+	{"CLOUD",	"ARM",	"setAttribute",	"arm.grp_vdevice",					set_grp_vdevice},
+	{"CLOUD",	"ARM",	"setAttribute",	"arm.trg_vdevice",					set_trg_vdevice},
+	{"CLOUD",	"ARM",	"setAttribute",	"arm.act_vdevice",					set_act_vdevice},
 
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.lst_device",						set_lst_device},
 	{"CLOUD",	"ARM",	"setAttribute",	"arm.eab_device",						set_eab_device},
@@ -517,6 +536,110 @@ DEF_UHANDLER(set_act_device) {
 	}
 	
 	return armpp_act_device((char *)mac, action_idx);
+}
+
+
+DEF_UHANDLER(set_add_vdevice) {
+	uproto_log_info(" ");
+
+	const char *mac = json_get_string(value, "mac");
+	if (mac == NULL) {
+		return -1;
+	}
+
+	return armpp_add_vdevcie((char *)mac);
+}
+DEF_UHANDLER(set_del_vdevice) {
+	uproto_log_info(" ");
+
+	int idx = -1;
+	if (json_get_int(value, "idx", &idx) != 0) {
+		uproto_log_warn("no idx");
+		return -1;
+	}
+	
+	return armpp_del_vdevice(idx);
+}
+
+DEF_UHANDLER(set_lst_vdevice) {
+	uproto_log_info(" ");
+
+	json_t *ja = (json_t*)armpp_lst_vdevice();
+	
+	/** TODO */
+	json_decref(ja);
+
+	return 0;
+}
+DEF_UHANDLER(set_eab_vdevice) {
+	uproto_log_info(" ");
+
+	int idx = -1;
+	if (json_get_int(value, "idx", &idx) != 0) {
+		uproto_log_warn("no idx");
+		return -1;
+	}
+	
+	return armpp_eab_vdevice(idx);
+}
+DEF_UHANDLER(set_dab_vdevice) {
+	uproto_log_info(" ");
+
+	int idx = -1;
+	if (json_get_int(value, "idx", &idx) != 0) {
+		uproto_log_warn("no idx");
+		return -1;
+	}
+	
+	return armpp_dab_vdevice(idx);
+}
+DEF_UHANDLER(set_grp_vdevice) {
+	uproto_log_info(" ");
+
+	int idx = -1;
+	if (json_get_int(value, "idx", &idx) != 0) {
+		uproto_log_warn("no idx");
+		return -1;
+	}
+	int sence_idx  = -1;
+	if (json_get_int(value, "sence_idx", &sence_idx) != 0) {
+		uproto_log_warn("no sence_ix");
+		return -2;
+	}
+	
+	return armpp_grp_vdevice(idx, sence_idx);
+}
+DEF_UHANDLER(set_trg_vdevice) {
+	uproto_log_info(" ");
+
+	int idx = -1;
+	if (json_get_int(value, "idx", &idx) != 0) {
+		uproto_log_warn("no idx");
+		return -1;
+	}
+	int trig_idx  = -1;
+	if (json_get_int(value, "trig_idx", &trig_idx) != 0) {
+		uproto_log_warn("no trig_ix");
+		return -2;
+	}
+	
+	return armpp_trg_vdevice(idx, trig_idx);
+}
+DEF_UHANDLER(set_act_vdevice) {
+	uproto_log_info(" ");
+
+	int idx = -1;
+	if (json_get_int(value, "idx", &idx) != 0) {
+		uproto_log_warn("no idx");
+		return -1;
+	}
+	int action_idx  = -1;
+	if (json_get_int(value, "action_idx", &action_idx) != 0) {
+		uproto_log_warn("no action_ix");
+		return -2;
+	}
+	
+	return armpp_act_vdevice(idx, action_idx);
 }
 
 DEF_UHANDLER(z3_device_list) {

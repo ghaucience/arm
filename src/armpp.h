@@ -25,6 +25,16 @@ int armpp_grp_device(char *mac, int sence_idx);
 int armpp_trg_device(char *mac, int trig_idx);
 int armpp_act_device(char *mac, int action_idx);
 
+int armpp_add_vdevcie(char *mac);
+int armpp_del_vdevice(int idx);
+int armpp_lst_vdevice();
+int armpp_eab_vdevice(int idx);
+int armpp_dab_vdevice(int idx);
+int armpp_grp_vdevice(int idx, int sence_idx);
+int armpp_trg_vdevice(int idx, int trig_idx);
+int armpp_act_vdevice(int idx, int action_idx);
+
+
 #ifdef __cplusplus
 }
 #endif
