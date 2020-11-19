@@ -241,7 +241,7 @@ end
                         "type" : "1212"
                 },
 --]]
-uu = f:section(Table, armjson.devices, "Sence Devices", translate(""))
+uu = f:section(Table, armjson.devices, "Availabe Devices", translate(""))
 o = uu:option(DummyValue, "modelstr",	translate("Name"))
 
 o = uu:option(DummyValue, "source",	translate("Wireless"))
