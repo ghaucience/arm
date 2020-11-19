@@ -98,7 +98,7 @@ function o.write(self, section, value)
 end
 
 o = uu:option(Button, 	  "Delete",	translate("Delete"))
-o.inputstyle = "remove"
+--o.inputstyle = "remove"
 function o.write(self, section)
     io.stderr:write('sence deleted\n')
     arm_ubus_send('arm.del_sence',{idx = armjson.sences[section].idx})
