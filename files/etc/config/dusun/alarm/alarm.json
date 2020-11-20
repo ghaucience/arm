@@ -50,6 +50,20 @@
       },
       {
          "attr" : "device.zone_status",
+         "idx" : 1,
+         "name" : "DoorMag",
+         "value" : "1",
+         "zone" : "door"
+      },
+      {
+         "attr" : "device.zone_status",
+         "idx" : 2,
+         "name" : "NoDoorMag",
+         "value" : "0",
+         "zone" : "door"
+      },
+      {
+         "attr" : "device.zone_status",
          "idx" : 3,
          "name" : "NoLeak",
          "value" : "1",

@@ -29,7 +29,7 @@ function arm_ubus_send(attr, value)
         luci.util.exec('ubus send DS.ARM \'' .. jsc.stringify(cmd) .. '\'')
 end
 
-a = SimpleForm("Security Alarm", translate(""), translate(""))
+a = SimpleForm("Security Sence", translate(""), translate(""))
 
 a.reset = false
 a.submit = false
@@ -37,12 +37,12 @@ a.embedded = true
 
 -- !! Add Sence
 -- ------------------------------------------------------------------------------------------
-uu = a:section(SimpleSection, "Add Alarm", translate(""));
+uu = a:section(SimpleSection, "Add Sence", translate(""));
 o = uu:option(DummyValue, "Add", translate(""))
 o.template = "admin_dusun/arm"
 
---f = SimpleForm("Security Alarm", translate("Security Alarm"), translate("This page is for Security Setting"))
-f = SimpleForm("Security Alarm", translate(""), translate(""))
+--f = SimpleForm("Security Sence", translate("Security Sence"), translate("This page is for Security Setting"))
+f = SimpleForm("Security Sence", translate("Security Sence"), translate(""))
 f.reset = false
 
 --local armstr 	= fs.readfile("/tmp/test.json")
@@ -61,10 +61,10 @@ local armjson	= jsc.parse(armstr or '{}')
                 {
                         "enable" : 1,
                         "idx" : 1,
-                        "name" : "KitchAlarm"
+                        "name" : "KitchSence"
                 }
 --]]
-uu = f:section(Table, armjson.sences, "Security Alarm", translate(""))
+uu = f:section(Table, armjson.sences, "Security Sence", translate(""))
 
 o = uu:option(DummyValue, "idx",	translate("Sence"))
 function o.cfgvalue(self, section)

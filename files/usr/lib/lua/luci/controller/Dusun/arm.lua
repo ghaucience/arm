@@ -1,8 +1,8 @@
 module("luci.controller.Dusun.arm", package.seeall)
 
 function index()
-    entry({"admin", "dusun", "arm"}, cbi("admin_dusun/arm"), _("Alarm"), 60)
-    entry({"admin", "dusun", "arm", "add_sence"}, call("action_arm_add_sence"), nil).leaf = true 
+    entry({"admin", "solution", "arm"}, cbi("admin_dusun/arm"), _("Security"), 60)
+    entry({"admin", "solution", "arm", "add_sence"}, call("action_arm_add_sence"), nil).leaf = true 
 end
 
 function action_arm_add_sence()                                                                              
