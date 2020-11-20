@@ -50,20 +50,6 @@
       },
       {
          "attr" : "device.zone_status",
-         "idx" : 1,
-         "name" : "DoorMag",
-         "value" : "1",
-         "zone" : "door"
-      },
-      {
-         "attr" : "device.zone_status",
-         "idx" : 2,
-         "name" : "NoDoorMag",
-         "value" : "0",
-         "zone" : "door"
-      },
-      {
-         "attr" : "device.zone_status",
          "idx" : 3,
          "name" : "NoLeak",
          "value" : "1",
@@ -75,6 +61,34 @@
          "name" : "Leak",
          "value" : "0",
          "zone" : "leak"
+      },
+      {
+         "attr" : "device.zone_status",
+         "idx" : 5,
+         "name" : "DoorMag",
+         "value" : "1",
+         "zone" : "door"
+      },
+      {
+         "attr" : "device.zone_status",
+         "idx" : 6,
+         "name" : "NoDoorMag",
+         "value" : "0",
+         "zone" : "door"
+      },
+			{
+         "attr" : "device.zone_status",
+         "idx" : 7,
+         "name" : "NonPanic",
+         "value" : "0",
+         "zone" : "panicbtn"
+      },
+			{
+         "attr" : "device.zone_status",
+         "idx" : 8,
+         "name" : "Panic",
+         "value" : "1",
+         "zone" : "panicbtn"
       }
    ],
    "devices" : [
