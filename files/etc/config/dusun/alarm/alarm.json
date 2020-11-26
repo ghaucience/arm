@@ -31,6 +31,24 @@
          "value" : {
             "value" : 0
          }
+      },
+      {
+         "attr" : "device.voicelight.alarm",
+         "idx" : 5,
+         "name" : "OpenAlarmDelay",
+         "value" : {
+            "value" : 1
+         },
+				 "delay" : 15
+      },
+      {
+         "attr" : "device.onoff",
+         "idx" : 6,
+         "name" : "OnDelay",
+         "value" : {
+            "value" : 1
+         },
+				 "delay" : 15
       }
    ],
    "conds" : [

@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 	}
 	log_info("ubus init ok!");
 
-	system("mkdir -p /tmp/arm");
+	system("mkdir -p /etc/config/dusun/alarm/");
 	
 	write_version(version_path);
 	

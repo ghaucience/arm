@@ -93,6 +93,6 @@ install: arm
 
 scp:
 	#scp -P2201 $(WORKDIR)/arm $(ROOTDIR)/files/etc/config/dusun/alarm/alarm.json root@192.168.0.230:/tmp
-	scp -P2201 $(WORKDIR)/arm  root@192.168.0.230:/tmp
-	#scp -P2201 $(ROOTDIR)/files/etc/config/dusun/alarm/alarm.json root@192.168.0.230:/etc/config/dusun/alarm/
-	scp -P2201 $(ROOTDIR)/files/usr/lib/lua/luci/model/cbi/admin_dusun/arm.lua root@192.168.0.230:/usr/lib/lua/luci/model/cbi/admin_dusun/
+	scp -P2205 $(WORKDIR)/arm  root@192.168.0.230:/tmp
+	scp -P2205 $(ROOTDIR)/files/etc/config/dusun/alarm/alarm.json root@192.168.0.230:/etc/config/dusun/alarm/
+	#scp -P2208 $(ROOTDIR)/files/usr/lib/lua/luci/model/cbi/admin_dusun/arm.lua root@192.168.0.230:/usr/lib/lua/luci/model/cbi/admin_dusun/

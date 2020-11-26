@@ -261,7 +261,52 @@ int armpp_init() {
 	return 0;
 }
 
+static map<string, map<unsigned int, int>> armpp_delay_action_map_list;
+void armpp_delay_action_func(void *arg) {
+	Json::Value *delay_item = (Json::Value*)arg;
+	stSchduleTask_t *task = (stSchduleTask_t*)(*delay_item)["task"].asInt();
 
+	/*
+	delay_item["sen_mac"] = mac;
+	delay_item["attr"]		= attr;
+	delay_item["value"]		= value;
+	delay_item["zone"]		= zone;
+	delay_item["act_mac"] = d["mac"].asString();
+	delay_item["act_idx"] = d["action_idx"].asInt();
+	*/
+
+	char uuid[64];
+	sprintf(uuid, "%d", rand()%1000000);
+
+	int ix;
+	Json::Value action = armpp_get_dev_action((*delay_item)["act_idx"].asInt(), ix);
+	Json::FastWriter wr;
+
+	json_error_t error;
+	json_t *jvalue = json_loads(wr.write(action["value"]).c_str(), 0, &error);
+	if (jvalue == NULL) {
+		log_warn("error action value");
+		armpp_delay_action_map_list[(*delay_item)["attr"].asString()].erase((unsigned int)task);
+		delete delay_item;
+		delete task;
+		return;
+	}
+
+	log_info("real do action from %s, value:%s", (*delay_item)["sen_mac"].asString().c_str(), (*delay_item)["value"].asString().c_str());
+	log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), wr.write(action["value"]).c_str(), (*delay_item)["act_mac"].asString().c_str());
+
+	uproto_call("CLOUD", "GREENPOWER",
+			(*delay_item)["act_mac"].asString().c_str(), 
+			action["attr"].asString().c_str(), 
+			"setAttribute",
+			jvalue,
+			0,
+			uuid);
+
+	armpp_delay_action_map_list[(*delay_item)["attr"].asString()].erase((unsigned int)task);
+	delete delay_item;
+	delete task;
+}
 
 int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *attr, int ep, char *value, char *zone) {
 	log_info("%s", __func__);
@@ -372,6 +417,31 @@ int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *at
 			0,
 			uuid);
 #else
+	
+	for (map<unsigned int, int>::iterator iti = armpp_delay_action_map_list[attr].begin();
+			iti != armpp_delay_action_map_list[attr].end();) {
+		map<unsigned int, int>::iterator it = iti;
+		iti++;
+
+		stSchduleTask_t *st = (stSchduleTask_t*)it->first;
+		Json::Value *delay_item = (Json::Value*)st->arg;
+		if ( (*delay_item)["sen_mac"].asString().compare(mac) != 0) {
+			it = iti;
+			continue;
+		}
+		if ( (*delay_item)["value"].asString().compare(value) == 0) {
+			it = iti;
+			continue;
+		}
+		
+		log_info("delete trigger's action from %s, value:%s", (*delay_item)["sen_mac"].asString().c_str(), (*delay_item)["value"].asString().c_str());
+		schedue_del(st);
+		delete delay_item;
+		delete st;
+		armpp_delay_action_map_list[attr].erase(it);
+		it = iti;
+	}
+
 	int ix = 0;
 	map<int,int> exe_stack;
 	for (Json::Value::iterator it=root["sendevs"].begin(); it!=root["sendevs"].end(); ++it) {
@@ -447,23 +517,44 @@ int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *at
 			//log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), action["value"].toStyledString().c_str(), d["mac"].asString().c_str());
 			log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), wr.write(action["value"]).c_str(), d["mac"].asString().c_str());
 
-			char uuid[64];
-			sprintf(uuid, "%d", rand()%1000000);
+			if (!action["delay"].isNull() && action["delay"].asInt() > 0) { // delay
+				Json::Value *delay_item = new Json::Value();
+				(*delay_item)["sen_mac"] = mac;
+				(*delay_item)["attr"]		= attr;
+				(*delay_item)["value"]		= value;
+				(*delay_item)["zone"]		= zone;
+				(*delay_item)["act_mac"] = d["mac"].asString();
+				(*delay_item)["act_idx"] = d["action_idx"].asInt();
 
-			json_error_t error;
-			json_t *jvalue = json_loads(wr.write(action["value"]).c_str(), 0, &error);
-			if (jvalue == NULL) {
-				log_warn("error action value");
-				continue;
+				stSchduleTask_t *task = new stSchduleTask_t;
+				(*delay_item)["task"] = (unsigned int)task;
+				schedue_add(task, action["delay"].asInt() * 1000, (void *)armpp_delay_action_func, (void *)delay_item);
+
+				// map<sen_mac, attr, value, act_mac, action>
+				// map<attr, vector<stSchduleTask_t*>>
+				// static map<string, list<stSchduleTask_t*>> armpp_delay_action_map_list;
+				
+				log_info("push action from %s, value:%s after %d to exec.", (*delay_item)["sen_mac"].asString().c_str(), (*delay_item)["value"].asString().c_str(), action["delay"].asInt());
+				armpp_delay_action_map_list[attr][(unsigned int)task] = 0;
+			} else {
+				char uuid[64];
+				sprintf(uuid, "%d", rand()%1000000);
+
+				json_error_t error;
+				json_t *jvalue = json_loads(wr.write(action["value"]).c_str(), 0, &error);
+				if (jvalue == NULL) {
+					log_warn("error action value");
+					continue;
+				}
+
+				uproto_call("CLOUD", "GREENPOWER",
+						d["mac"].asString().c_str(), 
+						action["attr"].asString().c_str(), 
+						"setAttribute",
+						jvalue,
+						0,
+						uuid);
 			}
-
-			uproto_call("CLOUD", "GREENPOWER",
-					d["mac"].asString().c_str(), 
-					action["attr"].asString().c_str(), 
-					"setAttribute",
-					jvalue,
-					0,
-					uuid);
 		}
 
 		char uuid[64];
