@@ -107,6 +107,32 @@
          "name" : "Panic",
          "value" : "1",
          "zone" : "panicbtn"
+      },
+			{
+         "attr" : "device.zone_status",
+         "idx" : 9,
+         "name" : "Arm",
+         "value" : "3",
+         "zone" : "arm"
+      },
+			{
+         "attr" : "device.zone_status",
+         "idx" : 10,
+         "name" : "Disarm",
+         "value" : "0",
+         "zone" : "arm"
+      },
+			{
+         "attr" : "device.onoff",
+         "idx" : 11,
+         "name" : "On",
+         "value" : "1"
+      },
+			{
+         "attr" : "device.onoff",
+         "idx" : 12,
+         "name" : "Off",
+         "value" : "0"
       }
    ],
    "devices" : [
