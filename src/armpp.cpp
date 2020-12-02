@@ -445,6 +445,7 @@ int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *at
 	int ix = 0;
 	map<int,int> exe_stack;
 	for (Json::Value::iterator it=root["sendevs"].begin(); it!=root["sendevs"].end(); ++it) {
+		/**> Dev */
 		Json::Value dev = *it;
 		if (dev.isNull()) {
 			log_warn("dev:%s not exsit", mac);
@@ -456,22 +457,7 @@ int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *at
 			continue;
 		}
 
-		if (dev["sence_idx"].asInt() <= 0) {
-			log_warn("dev:%s no sence", mac);
-			continue;
-		}
-
-		Json::Value sence = armpp_get_group(dev["sence_idx"].asInt(), ix);
-		if (sence.isNull()) {
-			log_warn("dev:%s no sence", mac);
-			continue;
-		}
-		if (sence["enable"].asInt() <= 0) {
-			log_warn("dev:%s sence disabled", mac);
-			continue;
-		}
-
-
+		/**> trigger */
 		Json::Value cond = armpp_get_dev_cond(dev["trig_idx"].asInt(), ix);
 		if (cond.isNull()) {
 			log_warn("dev:%s cond null", mac);
@@ -494,6 +480,23 @@ int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *at
 			}
 		}
 
+		/**> Sence */
+		if (dev["sence_idx"].asInt() <= 0) {
+			log_warn("dev:%s no sence", mac);
+			continue;
+		}
+
+		Json::Value sence = armpp_get_group(dev["sence_idx"].asInt(), ix);
+		if (sence.isNull()) {
+			log_warn("dev:%s no sence", mac);
+			continue;
+		}
+		if (sence["enable"].asInt() < 0) {
+			log_warn("dev:%s sence disabled", mac);
+			continue;
+		}
+
+
 		if (exe_stack.find(dev["sence_idx"].asInt()) != exe_stack.end()) {
 			log_debug("Ignore Executed Sence_idx:%d", dev["sence_idx"].asInt());
 			continue;
@@ -513,11 +516,19 @@ int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *at
 			}
 
 			Json::Value action = armpp_get_dev_action(d["action_idx"].asInt(), ix);
+			if (action["attr"].compare("arm.eab_sence") == 0 || action["attr"].compare("arm.dab_sence") == 0) {
+				;
+			} else {
+				if (sence["enable"].asInt() <= 0) {
+					log_warn("dev:%s sence disabled", mac);
+					continue;
+				}
+			}
 			Json::FastWriter wr;
 			//log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), action["value"].toStyledString().c_str(), d["mac"].asString().c_str());
-			log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), wr.write(action["value"]).c_str(), d["mac"].asString().c_str());
 
 			if (!action["delay"].isNull() && action["delay"].asInt() > 0) { // delay
+				log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), wr.write(action["value"]).c_str(), d["mac"].asString().c_str());
 				Json::Value *delay_item = new Json::Value();
 				(*delay_item)["sen_mac"] = mac;
 				(*delay_item)["attr"]		= attr;
@@ -546,14 +557,46 @@ int armpp_handle_msg(char *from, char *modelstr, char *type, char *mac, char *at
 					log_warn("error action value");
 					continue;
 				}
-
-				uproto_call("CLOUD", "GREENPOWER",
+				if (action["attr"].compare("arm.eab_sence") == 0 ||
+						action["attr"].compare("arm.dab_sence") == 0  ) {
+#if 0
+					json_object_set_new(jvalue, "idx", json_integer(dev["sence_idx"].asInt()));
+					uproto_call("CLOUD", "ARM",
 						d["mac"].asString().c_str(), 
 						action["attr"].asString().c_str(), 
 						"setAttribute",
 						jvalue,
 						0,
 						uuid);
+#else
+					int ixx;
+					Json::Value condx = armpp_get_dev_cond(d["trig_idx"].asInt(), ixx);
+					if (condx["value"].asString().compare(value) == 0) {
+						if (action["attr"].compare("arm.eab_sence") == 0) {
+							if (sence["enable"].asInt() == 0) {
+								log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), wr.write(action["value"]).c_str(), d["mac"].asString().c_str());
+								armpp_eab_sence(dev["sence_idx"].asInt());
+								armpp_write_file(root, root_file);
+							}
+						} else if (action["attr"].compare("arm.dab_sence") == 0) {
+							if (sence["enable"].asInt() == 1) {
+								log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), wr.write(action["value"]).c_str(), d["mac"].asString().c_str());
+								armpp_dab_sence(dev["sence_idx"].asInt());
+								armpp_write_file(root, root_file);
+							}
+						}
+					}
+#endif
+				} else {
+					log_debug("Execute Action:%s, value:%s for dev:%s", action["attr"].asString().c_str(), wr.write(action["value"]).c_str(), d["mac"].asString().c_str());
+					uproto_call("CLOUD", "GREENPOWER",
+						d["mac"].asString().c_str(), 
+						action["attr"].asString().c_str(), 
+						"setAttribute",
+						jvalue,
+						0,
+						uuid);
+				}
 			}
 		}
 

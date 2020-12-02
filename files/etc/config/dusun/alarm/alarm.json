@@ -1,5 +1,5 @@
 {
-   "actions" : [
+   "actions"": [
       {
          "attr" : "device.onoff",
          "idx" : 1,
@@ -49,7 +49,23 @@
             "value" : 1
          },
 				 "delay" : 15
-      }
+      },
+			{
+         "attr" : "arm.eab_sence",
+         "idx" : 7,
+         "name" : "EnableSence",
+         "value" : {
+            "value" : 1
+         }
+			},
+			{
+         "attr" : "arm.dab_sence",
+         "idx" : 8,
+         "name" : "DisableSence",
+         "value" : {
+            "value" : 0
+         }
+			}
    ],
    "conds" : [
       {
