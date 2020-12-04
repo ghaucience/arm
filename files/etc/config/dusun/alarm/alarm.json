@@ -65,6 +65,38 @@
          "value" : {
             "value" : 0
          }
+			},
+			{
+         "attr" : "device.switch.onoff",
+         "idx" : 9,
+         "name" : "SwitchOn",
+         "value" : {
+            "value" : 1
+         }
+			},
+			{
+         "attr" : "device.switch.onoff",
+         "idx" : 10,
+         "name" : "SwitchOff",
+         "value" : {
+            "value" : 0
+         }
+			},
+			{
+         "attr" : "device.light.onoff",
+         "idx" : 11,
+         "name" : "LightOn",
+         "value" : {
+            "value" : 1
+         }
+			},
+			{
+         "attr" : "device.light.onoff",
+         "idx" : 12,
+         "name" : "LightOff",
+         "value" : {
+            "value" : 0
+         }
 			}
    ],
    "conds" : [

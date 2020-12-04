@@ -29,20 +29,20 @@ function arm_ubus_send(attr, value)
         luci.util.exec('ubus send DS.ARM \'' .. jsc.stringify(cmd) .. '\'')
 end
 
-a = SimpleForm("Security Sence", translate(""), translate(""))
+a = SimpleForm("Security Scene", translate(""), translate(""))
 
 a.reset = false
 a.submit = false
 a.embedded = true
 
--- !! Add Sence
+-- !! Add Scene
 -- ------------------------------------------------------------------------------------------
-uu = a:section(SimpleSection, "Add Sence", translate(""));
+uu = a:section(SimpleSection, "Add Scene", translate(""));
 o = uu:option(DummyValue, "Add", translate(""))
 o.template = "admin_dusun/arm"
 
---f = SimpleForm("Security Sence", translate("Security Sence"), translate("This page is for Security Setting"))
-f = SimpleForm("Security Sence", translate("Security Sence"), translate(""))
+--f = SimpleForm("Security Scene", translate("Security Sene"), translate("This page is for Security Setting"))
+f = SimpleForm("Security Scene", translate("Security Scene"), translate(""))
 f.reset = false
 
 --local armstr 	= fs.readfile("/tmp/test.json")
@@ -55,18 +55,18 @@ local armjson	= jsc.parse(armstr or '{}')
 
 
 
--- !! Security Sences
+-- !! Security Scenes
 -- ------------------------------------------------------------------------------------------
 --[[
                 {
                         "enable" : 1,
                         "idx" : 1,
-                        "name" : "KitchSence"
+                        "name" : "KitchScene"
                 }
 --]]
-uu = f:section(Table, armjson.sences, "Security Sence", translate(""))
+uu = f:section(Table, armjson.sences, "Security Scene", translate(""))
 
-o = uu:option(DummyValue, "idx",	translate("Sence"))
+o = uu:option(DummyValue, "idx",	translate("Scene"))
 function o.cfgvalue(self, section)
     if (armjson.sences[section].idx == nil) then                                                               
             return '-'
@@ -125,7 +125,7 @@ end
                         "type" : "1212"
                 },
 --]]
-uu = f:section(Table, armjson.sendevs, "Sence Devices", translate(""))
+uu = f:section(Table, armjson.sendevs, "Scene Devices", translate(""))
 o = uu:option(DummyValue, "xidx",	translate("Idx"))
 function o.cfgvalue(self, section)
     return string.format("%s", armjson.sendevs[section].idx)
@@ -198,7 +198,7 @@ function o.write(self, section, value)
     end
 end
 
-o = uu:option(ListValue, "sence_idx",	translate("Sence"))
+o = uu:option(ListValue, "sence_idx",	translate("Scene"))
 o:value("0")
 for k,v in ipairs(armjson.sences) do
 	o:value(v.idx);
@@ -309,7 +309,7 @@ function o.write(self, section, value)
     end
 end
 
-o = uu:option(ListValue, "a_sence_idx",	translate("Sence"))
+o = uu:option(ListValue, "a_sence_idx",	translate("Scene"))
 o:value("0")
 for k,v in ipairs(armjson.sences) do
 	o:value(v.idx);
@@ -331,7 +331,7 @@ function o.write(self, section, value)
 		end
 end
 
-o = uu:option(Button, "Create",	translate("Create Sence Device"))
+o = uu:option(Button, "Create",	translate("Create Scene Device"))
 function o.write(self, section, value)
 			asize = #armjson.sendevs
 			local ix = 1
