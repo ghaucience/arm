@@ -1,7 +1,8 @@
 ROOTDIR=$(shell pwd)
 WORKDIR=$(ROOTDIR)/build
 
-ARCH								:= MT7620
+#ARCH								:= MT7620
+ARCH			:= LS1020
 USE_GM							:= 0
 
 ifeq ($(ARCH),MT7620)
@@ -16,6 +17,26 @@ CROSS_CFLAGS				+= -I$(CROSSTOOLDIR)/staging_dir/target-mipsel_24kec+dsp_uClibc-
 CROSS_LDFLAGS				:= -L$(CROSSTOOLDIR)/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/usr/lib
 CROSS_LDFLAGS				+= -L$(CROSSTOOLDIR)/staging_dir/target-mipsel_24kec+dsp_uClibc-0.9.33.2/usr/lib/ 
 endif
+
+
+ifeq ($(ARCH),LS1020)
+CROSS   := arm-openwrt-linux-
+CROSSTOOLDIR 				:=/home/au/openwrt
+export  STAGING_DIR := $(CROSSTOOLDIR)/staging_dir
+
+#toolchain-arm_cortex-a7+neon_gcc-4.8-linaro_uClibc-0.9.33.2_eabi/bin/
+#target-arm_cortex-a7+neon_uClibc-0.9.33.2_eabi
+
+export  PATH         := $(PATH):$(STAGING_DIR)/toolchain-arm_cortex-a7+neon_gcc-4.8-linaro_uClibc-0.9.33.2_eabi/bin
+CROSS_CFLAGS         := -I$(CROSSTOOLDIR)/staging_dir/toolchain-arm_cortex-a7+neon_gcc-4.8-linaro_uClibc-0.9.33.2_eabi/usr/include
+CROSS_CFLAGS         += -I$(CROSSTOOLDIR)/staging_dir/target-arm_cortex-a7+neon_uClibc-0.9.33.2_eabi/usr/include
+CROSS_LDFLAGS       := -L$(CROSSTOOLDIR)/staging_dir/toolchain-arm_cortex-a7+neon_gcc-4.8-linaro_uClibc-0.9.33.2_eabi/usr/lib
+CROSS_LDFLAGS       += -L$(CROSSTOOLDIR)/staging_dir/target-arm_cortex-a7+neon_uClibc-0.9.33.2_eabi/usr/lib
+
+
+endif
+
+
 
 GCC 		:= $(CROSS)gcc
 CXX			:= $(CROSS)g++
@@ -86,8 +107,8 @@ clean:
 install: arm
 	cp ./build/arm ./files/usr/bin/ -rf
 	cp ./files ./files_install -rf
-	/home/au/all/gwork/openwrt/staging_dir/host/bin/luac -o ./files_install/usr/lib/lua/luci/controller/Dusun/arm.lua ./files/usr/lib/lua/luci/controller/Dusun/arm.lua
-	/home/au/all/gwork/openwrt/staging_dir/host/bin/luac -o ./files_install/usr/lib/lua/luci/model/cbi/admin_dusun/arm.lua ./files/usr/lib/lua/luci/model/cbi/admin_dusun/arm.lua
+	$(STAGING_DIR)/host/bin/luac -o ./files_install/usr/lib/lua/luci/controller/Dusun/arm.lua ./files/usr/lib/lua/luci/controller/Dusun/arm.lua
+	$(STAGING_DIR)/host/bin/luac -o ./files_install/usr/lib/lua/luci/model/cbi/admin_dusun/arm.lua ./files/usr/lib/lua/luci/model/cbi/admin_dusun/arm.lua
 	(rm -rf /tmp/files.tar.gz; cd ./files_install; tar zcvf /tmp/files.tar.gz .; cd -; rm -rf ./files_install)
 	
 
