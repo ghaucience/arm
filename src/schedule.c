@@ -14,7 +14,7 @@ _U64_t schedue_current() {
 
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 
-	return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+	return (((_U64_t)(unsigned long)ts.tv_sec) * 1000 + ts.tv_nsec / 1000000);
 }
 
 static stSchduleTask_t * schedue_search(stSchduleTask_t * at) {

@@ -1,8 +1,8 @@
 ROOTDIR=$(shell pwd)
 WORKDIR=$(ROOTDIR)/build
 
-#ARCH								:= MT7620
-ARCH			:= LS1020
+ARCH								:= MT7620
+#ARCH			:= LS1020
 USE_GM							:= 0
 
 ifeq ($(ARCH),MT7620)
