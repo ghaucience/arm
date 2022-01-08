@@ -6,8 +6,9 @@
 		btn.disabled = true;
 		btn.value    = '<%:Adding ......%>';
 		var name = document.getElementById("sence_name").value;
+		//'sence_name='+name,
 		XHR.get('<%=luci.dispatcher.build_url("admin", "solution", "arm", "add_sence")%>',
-			'sence_name='+name,
+			{sence_name:name},
 			function()
 			{
 				btn.disabled = false;

@@ -1,6 +1,7 @@
 #include "schedule.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 static stSchduleTask_t * task_list = NULL;
 

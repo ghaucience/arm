@@ -1,8 +1,8 @@
 ROOTDIR=$(shell pwd)
 WORKDIR=$(ROOTDIR)/build
 
-ARCH								:= MT7620
-#ARCH			:= LS1020
+#ARCH								:= MT7620
+ARCH			:= LS1020
 USE_GM							:= 0
 
 ifeq ($(ARCH),MT7620)
@@ -21,17 +21,25 @@ endif
 
 ifeq ($(ARCH),LS1020)
 CROSS   := arm-openwrt-linux-
-CROSSTOOLDIR 				:=/home/au/openwrt
-export  STAGING_DIR := $(CROSSTOOLDIR)/staging_dir
 
+#CROSSTOOLDIR 				:=/home/au/openwrt
+#export  STAGING_DIR := $(CROSSTOOLDIR)/staging_dir
 #toolchain-arm_cortex-a7+neon_gcc-4.8-linaro_uClibc-0.9.33.2_eabi/bin/
 #target-arm_cortex-a7+neon_uClibc-0.9.33.2_eabi
+#export  PATH         := $(PATH):$(STAGING_DIR)/toolchain-arm_cortex-a7+neon_gcc-4.8-linaro_uClibc-0.9.33.2_eabi/bin
+#CROSS_CFLAGS         := -I$(CROSSTOOLDIR)/staging_dir/toolchain-arm_cortex-a7+neon_gcc-4.8-linaro_uClibc-0.9.33.2_eabi/usr/include
+#CROSS_CFLAGS         += -I$(CROSSTOOLDIR)/staging_dir/target-arm_cortex-a7+neon_uClibc-0.9.33.2_eabi/usr/include
+#CROSS_LDFLAGS       := -L$(CROSSTOOLDIR)/staging_dir/toolchain-arm_cortex-a7+neon_gcc-4.8-linaro_uClibc-0.9.33.2_eabi/usr/lib
+#CROSS_LDFLAGS       += -L$(CROSSTOOLDIR)/staging_dir/target-arm_cortex-a7+neon_uClibc-0.9.33.2_eabi/usr/lib
 
-export  PATH         := $(PATH):$(STAGING_DIR)/toolchain-arm_cortex-a7+neon_gcc-4.8-linaro_uClibc-0.9.33.2_eabi/bin
-CROSS_CFLAGS         := -I$(CROSSTOOLDIR)/staging_dir/toolchain-arm_cortex-a7+neon_gcc-4.8-linaro_uClibc-0.9.33.2_eabi/usr/include
-CROSS_CFLAGS         += -I$(CROSSTOOLDIR)/staging_dir/target-arm_cortex-a7+neon_uClibc-0.9.33.2_eabi/usr/include
-CROSS_LDFLAGS       := -L$(CROSSTOOLDIR)/staging_dir/toolchain-arm_cortex-a7+neon_gcc-4.8-linaro_uClibc-0.9.33.2_eabi/usr/lib
-CROSS_LDFLAGS       += -L$(CROSSTOOLDIR)/staging_dir/target-arm_cortex-a7+neon_uClibc-0.9.33.2_eabi/usr/lib
+CROSSTOOLDIR 				:=/home/au/all/gwork/op2102
+export  STAGING_DIR := $(CROSSTOOLDIR)/staging_dir
+export  PATH         := $(PATH):$(STAGING_DIR)/toolchain-arm_cortex-a7+neon-vfpv4_gcc-8.4.0_musl_eabi/bin
+CROSS_CFLAGS         := -I$(CROSSTOOLDIR)/staging_dir/toolchain-arm_cortex-a7+neon-vfpv4_gcc-8.4.0_musl_eabi/usr/include
+CROSS_CFLAGS         += -I$(CROSSTOOLDIR)/staging_dir/target-arm_cortex-a7+neon-vfpv4_musl_eabi/usr/include
+CROSS_LDFLAGS       := -L$(CROSSTOOLDIR)/staging_dir/toolchain-arm_cortex-a7+neon-vfpv4_gcc-8.4.0_musl_eabi/usr/lib
+CROSS_LDFLAGS       += -L$(CROSSTOOLDIR)/staging_dir/target-arm_cortex-a7+neon-vfpv4_musl_eabi/usr/lib
+
 
 
 endif
