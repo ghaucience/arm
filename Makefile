@@ -97,6 +97,7 @@ arm:  $(objs)
 	#$(GCC) 	$(TARGET_CFLAGS) $(TARGET_LDFLAGS) $(srcs) -o  $(WORKDIR)/$@
 	$(GCC) 		$(TARGET_LDFLAGS) $(objs) -o  $(WORKDIR)/$@
 	$(STRIP)	$(WORKDIR)/$@
+	#g++ `find ./build/ -name "*.o" | xargs` -o ./build/arm -ljansson -lubus -lblobmsg_json -lubox
 
 
 $(ROOTDIR)/build/%.o : $(ROOTDIR)/%.c
