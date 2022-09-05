@@ -62,7 +62,7 @@ MKDIR		:= mkdir -p
 TARGET_CFLAGS							:= -Wall -g -O2  
 TARGET_CFLAGS							+= -I$(ROOTDIR)/gecko -I$(ROOTDIR)/ble/include/security
 TARGET_CFLAGS							+= -I$(ROOTDIR)/src
-#TARGET_CFLAGS							+= -fPIC -DJSON_IS_AMALGAMATION
+#TARGET_CFLAGS							+= -fPIC -DJSON_IS_AMALGAMATION -D_GLIBCXX_USE_CXX11_ABI=0
 TARGET_CFLAGS							+= -fPIC 
 #TARGET_CFLAGS							+= -fpermissive
 TARGET_CFLAGS							+= $(CROSS_CFLAGS) 
